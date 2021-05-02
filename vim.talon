@@ -1,12 +1,12 @@
-title: /- VIM/
+title: /- G?VIM/
 -
 settings():
     # Allow you to tweak the detected bounding box, default is just the window
-    user.telector_bounding_box = "active_window:25 0 -10 -0"
+    user.telector_bounding_box = "active_window:30 0 -10 -0"
     # Would be mouse_fill, background, pixel_fill
     user.telector_background_detector = "explicit_colors:#252525"
-    user.telector_selection_background = "#ffffff"
     # user.telector_debug_mode = 1
+    user.telector_word_spacing = 10
 
 # Floodfill from mouse cursor, relative to window, relative to image, floodfill from text cursor
 # Selection colours (find text within these)
