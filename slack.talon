@@ -1,7 +1,5 @@
 title: /^Slack/
 -
-folder select:
-
 main down:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative(".", "-328")
