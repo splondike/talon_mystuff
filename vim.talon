@@ -20,3 +20,32 @@ save that:
 ddent:
     key('d')
     key('d')
+
+spammer: ", "
+
+complete [next]: key(ctrl-n)
+complete previous: key(ctrl-p)
+
+swap: ",s"
+
+shift left:
+    insert("<<")
+
+shift right:
+    insert(">>")
+
+search grep:
+    key(escape)
+    insert(":Rg ")
+
+search grep <user.text>:
+    key(escape)
+    insert(":Rg {text}")
+
+action(edit.redo):
+    key(escape)
+    key(shift-z)
+
+action(edit.undo):
+    key(escape)
+    key(z)

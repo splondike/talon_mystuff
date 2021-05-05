@@ -13,11 +13,16 @@ title: /VIM$/
 class VimWinActions:
     def file_ext():
         title = ui.active_window().title
-        bit, *_ = title.split("(")
-        if bit.endswith(" + "):
-            filename = bit[:-3]
+        if "(" in title:
+            bit, *_ = title.split("(")
+            if bit.endswith(" + "):
+                filename = bit[:-3]
+            else:
+                filename = bit[:-1]
+        elif "..." in title:
+            filename = title[:title.find("...")]
         else:
-            filename = bit[:-1]
+            return ""
 
         try:
             pos = filename.index(".")
@@ -27,5 +32,8 @@ class VimWinActions:
 
 @ctx.action_class("user")
 class VimUserActions:
+    def pop():
+        actions.key("ctrl-n")
+
     def paste(text: str):
         actions.insert(text)

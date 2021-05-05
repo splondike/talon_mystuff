@@ -15,6 +15,28 @@ git status:
     insert("git status")
     key("enter")
 
+git checkout:
+    insert("git checkout feature/")
+
+git diff:
+    insert("git diff HEAD^..HEAD")
+
+docker compose exec backend:
+    insert("docker-compose exec backend bash")
+    key("enter")
+
+docker compose exec frontend:
+    insert("docker-compose exec backend bash")
+    key("enter")
+
+docker compose exec database:
+    insert("docker-compose exec database bash")
+    key("enter")
+
+docker compose run backend:
+    insert("docker-compose run --rm backend bash")
+    key("enter")
+
 vim:
     insert("vim")
     key("enter")

@@ -28,3 +28,15 @@ navigate previous:
     user.mouse_pos_active_window_relative("-43", "157")
     mouse_click(0)
     user.mouse_pos_restore()
+
+main down:
+    user.mouse_pos_save()
+    user.mouse_pos_active_window_relative(".", "-10")
+    mouse_scroll(5)
+    user.mouse_pos_restore()
+
+main up:
+    user.mouse_pos_save()
+    user.mouse_pos_active_window_relative(".", "-10")
+    mouse_scroll(-5)
+    user.mouse_pos_restore()
