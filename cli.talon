@@ -37,8 +37,12 @@ docker compose run backend:
     insert("docker-compose run --rm backend bash")
     key("enter")
 
-vim:
+run vim:
     insert("vim")
+    key("enter")
+
+run my sequel:
+    insert("mysql")
     key("enter")
 
 list files:
