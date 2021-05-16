@@ -7,3 +7,8 @@ dock block:
     key(enter)
     insert('"""')
     key(up end enter)
+
+push:
+    key(end)
+    insert(":")
+    key(enter)
