@@ -6,3 +6,4 @@ settings():
     user.i3_mod_key = "alt"
     user.telector_enable_win_rect_workaround = 1
     user.telector_enable_marker_ui_offset = 1
+    user.mouse_wheel_down_amount = 5
