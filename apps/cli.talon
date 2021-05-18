@@ -1,8 +1,11 @@
 app.exe: urxvt
 -
+git fetch:
+    insert("git fetch")
+    key("enter")
+
 git rebase main:
     insert("git rebase origin/main")
-    key("enter")
 
 git add:
     insert("git add ")
@@ -35,6 +38,10 @@ docker compose exec database:
 
 docker compose run backend:
     insert("docker-compose run --rm backend bash")
+    key("enter")
+
+docker compose up:
+    insert("docker-compose up")
     key("enter")
 
 run vim:

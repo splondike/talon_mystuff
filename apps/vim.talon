@@ -49,3 +49,6 @@ action(edit.redo):
 action(edit.undo):
     key(escape)
     key(z)
+
+move line up: key(ctrl-f)
+move line down: key(ctrl-s)
