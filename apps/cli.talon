@@ -10,6 +10,10 @@ git rebase main:
 git add:
     insert("git add ")
 
+git commit:
+    insert("git commit")
+    key("enter")
+
 git commit inline:
     insert("git commit -m \"\"")
     key("left")
@@ -20,6 +24,9 @@ git status:
 
 git checkout:
     insert("git checkout feature/")
+
+git push origin:
+    insert("git push origin ")
 
 git diff:
     insert("git diff HEAD^..HEAD")
