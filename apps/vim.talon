@@ -28,11 +28,8 @@ complete previous: key(ctrl-p)
 
 swap: ",s"
 
-shift left:
-    insert("<<")
-
-shift right:
-    insert(">>")
+action(edit.indent_less): "<<"
+action(edit.indent_more): ">>"
 
 search grep:
     key(escape)
