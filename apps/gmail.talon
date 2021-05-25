@@ -17,13 +17,13 @@ navigate inbox:
     sleep(0.1)
     user.mouse_pos_restore()
 
-navigate next:
+navigate last:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative("-81", "157")
     mouse_click(0)
     user.mouse_pos_restore()
 
-navigate previous:
+navigate next:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative("-43", "157")
     mouse_click(0)
