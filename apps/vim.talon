@@ -1,4 +1,4 @@
-title: /- G?VIM/
+title: /^VIM/
 -
 settings():
     # Allow you to tweak the detected bounding box, default is just the window

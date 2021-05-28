@@ -6,23 +6,14 @@ from talon import ui, actions, Context
 
 ctx = Context()
 ctx.matches = r"""
-title: /VIM$/
+title: /^VIM/
 """
 
 @ctx.action_class("win")
 class VimWinActions:
     def file_ext():
         title = ui.active_window().title
-        if "(" in title:
-            bit, *_ = title.split("(")
-            if bit.endswith(" + "):
-                filename = bit[:-3]
-            else:
-                filename = bit[:-1]
-        elif "..." in title:
-            filename = title[:title.find("...")]
-        else:
-            return ""
+        filename = title.split(" - ", 1)[1]
 
         try:
             pos = filename.index(".")
