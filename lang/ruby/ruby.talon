@@ -96,6 +96,7 @@ state do: "do "
 state end: "end"
 state begin: "begin"
 state rescue: "rescue "
+state module: "module "
 
 # Do instance variables
 ^instance <user.text>$:
