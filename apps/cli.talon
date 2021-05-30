@@ -31,6 +31,10 @@ git push origin:
 git diff:
     insert("git diff HEAD^..HEAD")
 
+git log:
+    insert("git log")
+    key("enter")
+
 docker compose exec backend:
     insert("docker-compose exec backend bash")
     key("enter")
@@ -72,6 +76,14 @@ source environment:
     key("alt-b")
     key("alt-b")
     key("alt-b")
+
+source machine learning:
+    insert("source ~/Desktop/machine-learning-venv/bin/activate")
+    key(enter)
+
+change directory talon:
+    insert("cd ~/.talon/user/mystuff")
+    key(enter)
 
 ship insert:
     key('shift-insert')

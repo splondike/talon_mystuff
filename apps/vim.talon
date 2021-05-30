@@ -28,6 +28,10 @@ complete previous: key(ctrl-p)
 
 swap: ",s"
 
+swap recent: ",t"
+
+swap files: ",f"
+
 action(edit.indent_less): "<<"
 action(edit.indent_more): ">>"
 
@@ -49,3 +53,7 @@ action(edit.undo):
 
 move line up: key(ctrl-f)
 move line down: key(ctrl-s)
+
+slapper:
+    key(end)
+    key(enter)
