@@ -13,7 +13,12 @@ title: /^VIM/
 class VimWinActions:
     def file_ext():
         title = ui.active_window().title
-        filename = title.split(" - ", 1)[1]
+        try:
+            filename = title.split(" - ", 1)[1]
+        except IndexError:
+            # If file names get long, VIM seems to stop following
+            # my title formatting rules
+            return ""
 
         try:
             pos = filename.index(".")
