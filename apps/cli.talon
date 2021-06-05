@@ -81,9 +81,32 @@ source machine learning:
     insert("source ~/Desktop/machine-learning-venv/bin/activate")
     key(enter)
 
+change directory knaus:
+    insert("cd ~/.talon/user/knausj_talon")
+    key(enter)
+
 change directory talon:
     insert("cd ~/.talon/user/mystuff")
     key(enter)
+
+seedy up: "cd ../"
+
+seedy up <number_small>$:
+    dots = user.repeat_text("../", number_small)
+    insert("cd " + dots)
+
+seedy search$:
+    # Uses fzf's bash completion with `fd` to change directory
+    key(alt-c)
+
+seedy search <phrase>$:
+    # Uses fzf's bash completion with `fd` to change directory
+    key(alt-c)
+    insert(phrase)
+
+file path insert:
+    # Uses fzf's bash completion with `fd` to insert a file path
+    key(ctrl-t)
 
 ship insert:
     key('shift-insert')
