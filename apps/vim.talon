@@ -22,19 +22,21 @@ edit file:
     insert(":e ")
 
 ddent:
+    key(escape)
     key('d')
     key('d')
 
-spammer: ", "
+swap:
+    key(escape)
+    insert(",s")
 
-complete [next]: key(ctrl-n)
-complete previous: key(ctrl-p)
+swap recent:
+    key(escape)
+    insert(",t")
 
-swap: ",s"
-
-swap recent: ",t"
-
-swap files: ",f"
+swap files:
+    key(escape)
+    insert(",f")
 
 action(edit.indent_less): "<<"
 action(edit.indent_more): ">>"
@@ -57,10 +59,6 @@ action(edit.undo):
 
 move row up: key(ctrl-f)
 move row down: key(ctrl-s)
-
-slapper:
-    key(end)
-    key(enter)
 
 go row <digit_string>:
     key(escape)
