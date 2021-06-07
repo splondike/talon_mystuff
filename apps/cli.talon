@@ -110,3 +110,5 @@ file path insert:
 
 ship insert:
     key('shift-insert')
+
+action(edit.paste): key(ctrl-alt-v)

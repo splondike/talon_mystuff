@@ -17,6 +17,10 @@ save that:
     insert(":w")
     key(enter)
 
+edit file:
+    key(escape)
+    insert(":e ")
+
 ddent:
     key('d')
     key('d')
@@ -51,9 +55,14 @@ action(edit.undo):
     key(escape)
     key(z)
 
-move line up: key(ctrl-f)
-move line down: key(ctrl-s)
+move row up: key(ctrl-f)
+move row down: key(ctrl-s)
 
 slapper:
     key(end)
+    key(enter)
+
+go row <digit_string>:
+    key(escape)
+    insert(":" + digit_string)
     key(enter)

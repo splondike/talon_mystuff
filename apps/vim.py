@@ -9,6 +9,16 @@ ctx.matches = r"""
 title: /^VIM/
 """
 
+ctx_normal = Context()
+ctx_normal.matches = r"""
+title: /^VIM n/
+"""
+
+ctx_insert = Context()
+ctx_insert.matches = r"""
+title: /^VIM i/
+"""
+
 @ctx.action_class("win")
 class VimWinActions:
     def file_ext():
@@ -26,7 +36,7 @@ class VimWinActions:
         except ValueError:
             return ""
 
-@ctx.action_class("user")
+@ctx_insert.action_class("user")
 class VimUserActions:
     def pop():
         actions.key("ctrl-n")
