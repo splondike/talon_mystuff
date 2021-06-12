@@ -50,11 +50,9 @@ search grep <user.text>:
     insert(":Rg {text}")
 
 action(edit.redo):
-    key(escape)
     key(shift-z)
 
 action(edit.undo):
-    key(escape)
     key(z)
 
 move row up: key(ctrl-f)
@@ -64,3 +62,23 @@ go row <digit_string>:
     key(escape)
     insert(":" + digit_string)
     key(enter)
+
+go symbol <user.any_alphanumeric_key>:
+    key(escape)
+    insert("f")
+    insert(any_alphanumeric_key)
+
+select row <digits>:
+    user.vim_select_rows(digits)
+
+select row <digits> through <digits>:
+    user.vim_select_rows(digits_1, digits_2)
+
+replace between dubquote:
+    insert('rs"')
+
+replace between quote:
+    insert("rs'")
+
+replace between paren:
+    insert("rs(")
