@@ -20,12 +20,14 @@ navigate inbox:
 navigate last:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative("-81", "157")
+    sleep(0.1)
     mouse_click(0)
     user.mouse_pos_restore()
 
 navigate next:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative("-43", "157")
+    sleep(0.1)
     mouse_click(0)
     user.mouse_pos_restore()
 
