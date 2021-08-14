@@ -14,3 +14,17 @@ action(edit.redo):
 
 action(edit.undo):
     key(ctrl-o z)
+
+jump back:
+    key(escape)
+    "?"
+
+jump back <user.word>:
+    key(escape)
+    insert("?" + word)
+    key(enter)
+
+jump forward <user.word>:
+    key(escape)
+    insert("/" + word)
+    key(enter)

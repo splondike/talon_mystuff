@@ -82,3 +82,14 @@ replace between quote:
 
 replace between paren:
     insert("rs(")
+
+jump back:
+    "?"
+
+jump back <user.word>:
+    insert("?" + word)
+    key(enter)
+
+jump forward <user.word>:
+    insert("/" + word)
+    key(enter)

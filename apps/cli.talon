@@ -4,8 +4,8 @@ git fetch:
     insert("git fetch")
     key("enter")
 
-git rebase main:
-    insert("git rebase origin/main")
+git rebase master:
+    insert("git rebase origin/master")
 
 git add:
     insert("git add ")

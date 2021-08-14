@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from talon import actions, clip, screen, Module
+from talon import actions, ui, clip, screen, Module
 from talon.types import Rect as TalonRect
 from talon.experimental import locate
 
@@ -10,33 +10,7 @@ mod = Module()
 
 
 def find_active_window_rect() -> TalonRect:
-    """
-    The Talon active window rect detector is buggy under LInux. So allow getting it a
-    different way.
-    """
-
-    active_window_id = subprocess.run(
-        ["xdotool", "getactivewindow"],
-        capture_output=True,
-        check=True
-    ).stdout.strip()
-    active_window_geom = subprocess.run(
-        ["xdotool", "getwindowgeometry", "--shell", active_window_id],
-        capture_output=True,
-        check=True
-    ).stdout
-    val_map = {
-        key.decode("utf8"): int(val)
-        for line in active_window_geom.splitlines()
-        for key, val in (line.split(b"="),)
-    }
-
-    return TalonRect(
-        val_map["X"],
-        val_map["Y"],
-        val_map["WIDTH"],
-        val_map["HEIGHT"],
-    )
+    return ui.active_window().rect
 
 
 def calculate_relative(modifier: str, start: int, end: int) -> int:

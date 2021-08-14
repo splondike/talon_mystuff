@@ -86,4 +86,4 @@ def _register_undo_checkpointer(window):
             _undo_checkpointer
         )
 
-ui.register("win_focus", _register_undo_checkpointer)
+# ui.register("win_focus", _register_undo_checkpointer)

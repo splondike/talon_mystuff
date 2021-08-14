@@ -9,13 +9,13 @@ item select:
 main up:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative(".", "-50")
-    mouse_scroll(-5)
+    mouse_scroll(-5, 0, 1)
     user.mouse_pos_restore()
 
 main down:
     user.mouse_pos_save()
     user.mouse_pos_active_window_relative(".", "-50")
-    mouse_scroll(5)
+    mouse_scroll(5, 0, 1)
     user.mouse_pos_restore()
 
 page visit:
