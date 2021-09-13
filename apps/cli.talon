@@ -1,4 +1,4 @@
-app.exe: urxvt
+app.exe: kitty
 -
 git fetch:
     insert("git fetch")
