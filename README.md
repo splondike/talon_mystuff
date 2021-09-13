@@ -1,0 +1,1 @@
+This is just a bunch of small customisations I've made for my own Talon workflows. It's not really a standalone package. It's uses my telector package, the knausj repo, and some pop to action/macro stuff made by fidgetingbits.
