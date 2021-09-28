@@ -1,1 +1,1 @@
-This is just a bunch of small customisations I've made for my own Talon workflows. It's not really a standalone package. It's uses my talon\_ui\_helper package, the knausj repo, and some pop to action/macro stuff made by fidgetingbits.
+This is just a bunch of small customisations I've made for my own Talon workflows. It's not really a standalone package. It's uses my talon\_ui\_helper and talon\_telector packages, and the knausj repo.
