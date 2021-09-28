@@ -1,16 +1,12 @@
 title: /Evolution/
 -
-# settings():
-#     user.telector_debug_mode = 1
-#     user.telector_bounding_box = "active_window:310 70 370 400"
-#     user.telector_background_detector = "explicit_colors:#ffffff #eeeeee"
-#     user.telector_target_mode = "lines"
-
 folder select:
-    user.telector_show("active_window:0 110 216 -174", "explicit_colors:#ffffff", "lines")
+    bounding_rectangle = user.mouse_helper_calculate_relative_rect("35 108 73 -164", "active_window")
+    user.mouse_helper_blob_picker(bounding_rectangle)
 
 item select:
-    user.telector_show("active_window:310 70 370 400", "explicit_colors:#ffffff #eeeeee", "lines")
+    bounding_rectangle = user.mouse_helper_calculate_relative_rect("343 138 378 450", "active_window")
+    user.mouse_helper_blob_picker(bounding_rectangle)
 
 message create:
     key(ctrl-shift-m)
@@ -22,13 +18,13 @@ message reply all:
     key(ctrl-shift-r)
 
 main up:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative(".", "-50")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative(".", "-200")
     mouse_scroll(-5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 main down:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative(".", "-50")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative(".", "-200")
     mouse_scroll(5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()

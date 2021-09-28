@@ -1,59 +1,65 @@
 title: /^Slack/
 -
 main down:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative(".", "-328")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative(".", "-328")
     mouse_scroll(5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 main up:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative(".", "-328")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative(".", "-328")
     mouse_scroll(-5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 folder select:
-    user.telector_show("active_window:2 201 54 -2", "explicit_colors:#4d394b", "lines")
+    bounding_rectangle = user.mouse_helper_calculate_relative_rect("18 195 47 -49", "active_window")
+    user.mouse_helper_blob_picker(bounding_rectangle)
 
 folder down:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative("64", ".")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative("64", ".")
     mouse_scroll(5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 folder up:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative("64", ".")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative("64", ".")
     mouse_scroll(-5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 main focus:
-    user.mouse_pos_save()
-    user.mouse_move_image_relative("slack/message-corner.png", 55, 10, 0)
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2021-09-28_11.58.50.914640.png", 0, 0, -35)
+    sleep(0.05)
     mouse_click(0)
-    user.mouse_pos_restore()
+    sleep(0.05)
+    user.mouse_helper_position_restore()
 
 side focus:
-    user.mouse_pos_save()
-    user.mouse_move_image_relative("slack/message-corner.png", 30, 10, 1)
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2021-09-28_11.58.50.914640.png", 1, 0, -35)
+    sleep(0.05)
     mouse_click(0)
-    user.mouse_pos_restore()
+    sleep(0.05)
+    user.mouse_helper_position_restore()
 
 side close:
-    user.mouse_pos_save()
-    user.mouse_move_image_relative("slack/close-icon.png", 0, 0)
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_image_relative("2021-09-28_12.00.03.679682.png", 0)
+    sleep(0.05)
     mouse_click(0)
-    sleep(0.1)
-    user.mouse_pos_restore()
+    sleep(0.05)
+    user.mouse_helper_position_restore()
 
 side down:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative("-36", "622")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative("-36", "622")
     mouse_scroll(5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
 
 side up:
-    user.mouse_pos_save()
-    user.mouse_pos_active_window_relative("-36", "622")
+    user.mouse_helper_position_save()
+    user.mouse_helper_move_active_window_relative("-36", "622")
     mouse_scroll(-5)
-    user.mouse_pos_restore()
+    user.mouse_helper_position_restore()
