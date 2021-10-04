@@ -16,6 +16,9 @@ item select:
     bounding_rectangle = user.mouse_helper_calculate_relative_rect("233 54 258 327", "active_window")
     user.mouse_helper_blob_picker(bounding_rectangle)
 
+item mark:
+    key(m n)
+
 main up:
     user.mouse_helper_position_save()
     user.mouse_helper_move_active_window_relative(".", "-50")
@@ -32,7 +35,7 @@ page visit:
     user.mouse_helper_position_save()
     user.mouse_helper_move_active_window_relative("197", "265")
     mouse_click(0)
-    use.mouse_helper_position_restore()
+    user.mouse_helper_position_restore()
 
 page copy:
     user.mouse_helper_position_save()

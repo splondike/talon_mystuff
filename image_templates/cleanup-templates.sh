@@ -2,6 +2,8 @@
 
 # Removes any unused image template files
 
-unused=$(comm -23 <(ls *.png) <(grep -h -R -P -o "(?<=move_image_relative\(\")[^\"]+" ..))
+unused=$(comm -23 <(ls *.png | sort) <(grep -h -R -P -o "(?<=move_image_relative\(\")[^\"]+" .. | sort))
 
-rm $unused
+if [ -n "$unused" ];then
+    rm $unused
+fi

@@ -28,15 +28,18 @@ ddent:
 
 swap:
     key(escape)
-    insert(",s")
+    insert(":Files")
+    key(return)
 
 swap recent:
     key(escape)
-    insert(",t")
+    insert(":Buffers")
+    key(return)
 
 swap files:
     key(escape)
-    insert(",f")
+    insert(":Files")
+    key(return)
 
 action(edit.indent_less): "<<"
 action(edit.indent_more): ">>"

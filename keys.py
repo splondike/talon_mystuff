@@ -16,7 +16,6 @@ def _add_keys():
         k: v
         for k, v in registry.lists['user.special_key'][0].items()
     }
-    my_list['return'] = 'enter'
-    my_list['tabby'] = 'tab'
+    my_list['enta'] = 'enter'
     ctx.lists['self.special_key'] = my_list
 app.register("launch", _add_keys)
