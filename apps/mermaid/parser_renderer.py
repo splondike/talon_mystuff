@@ -207,21 +207,29 @@ def parse_graph(text: str) -> MermaidGraph:
 
 
 def render_graph(parsed: MermaidGraph) -> str:
+    indent = " " * 4
     out_lines = []
     out_lines.append(f"graph {parsed.direction}")
 
-    print(parsed.nodes)
     nodes = sorted(parsed.nodes, key=lambda x: x["name"])
     edges = sorted(parsed.edges.items(), key=lambda x: x[0])
     have_node_styles = False
     have_edge_styles = False
+    node_positions = {}
 
     for node in nodes:
-        out = f"    {node['name']}"
+        out = f"{indent}{node['name']}"
 
         if node["label"]:
             out += f"[{node['label']}]"
         out_lines.append(out)
+        node_positions[node["name"]] = {
+            "line": len(out_lines) - 1,
+            "name_start": len(indent),
+            "name_length": len(node["name"]),
+            "label_start": len(indent) + len(node["name"]) + 1 if node["label"] else None,
+            "label_length": len(node["label"]) if node["label"] else 0
+        }
 
         have_node_styles = have_node_styles or (node["styles"] != {})
 
@@ -229,7 +237,7 @@ def render_graph(parsed: MermaidGraph) -> str:
         out_lines.append("")
 
     for ((node1, node2), data) in edges:
-        out = f"    {node1} -->"
+        out = f"{indent}{node1} -->"
         if data["label"]:
             out += f"|{data['label']}|"
         out += f" {node2}"
@@ -247,7 +255,7 @@ def render_graph(parsed: MermaidGraph) -> str:
                 f"{k}:{v}"
                 for k, v in sorted(node["styles"].items())
             )
-            out_lines.append(f"    style {node['name']} {styles}")
+            out_lines.append(f"{indent}style {node['name']} {styles}")
 
     if have_edge_styles:
         out_lines.append("")
@@ -259,9 +267,12 @@ def render_graph(parsed: MermaidGraph) -> str:
                 f"{k}:{v}"
                 for k, v in sorted(data["styles"].items())
             )
-            out_lines.append(f"    linkStyle {i} {styles}")
+            out_lines.append(f"{indent}linkStyle {i} {styles}")
 
-    return "\n".join(out_lines)
+    return {
+        "graph_str": "\n".join(out_lines),
+        "node_positions": node_positions
+    }
 
 
 # Test
