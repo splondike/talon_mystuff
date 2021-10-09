@@ -1,4 +1,5 @@
 import time
+import itertools
 from typing import Any, Optional
 
 from talon import Module, actions, clip, registry
@@ -61,9 +62,14 @@ class MermaidLiveActions:
             for node in graph.nodes
         ])
 
-        for letter in registry.lists["user.letter"][0].values():
-            if letter not in used_nodes:
-                return letter
+        letters = list(registry.lists["user.letter"][0].values())
+        for letter1, letter2 in itertools.product([""] + letters, letters):
+            if letter1 == letter2:
+                continue
+
+            combo = f"{letter1}{letter2}"
+            if combo not in used_nodes:
+                return combo
 
         raise RuntimeError("No unused node names")
 

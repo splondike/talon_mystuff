@@ -13,46 +13,46 @@ add <user.prose>:
     user.mermaid_set_graph(new_graph)
     user.mermaid_select_node_label(new_graph, node_name, 3)
 
-relabel {user.letter}:
+relabel <user.letters>:
     graph = user.mermaid_parse_graph()
-    user.mermaid_select_node_label(graph, letter, 3)
+    user.mermaid_select_node_label(graph, letters, 3)
 
-join {user.letter} through {user.letter}:
+join <user.letters> through <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_join_nodes(graph, user.letter_2, user.letter_1)
+    new_graph = user.mermaid_join_nodes(graph, user.letters_2, user.letters_1)
     user.mermaid_set_graph(new_graph)
 
-boost {user.letter} through {user.letter}:
+boost <user.letters> through <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_join_nodes(graph, user.letter_2, user.letter_1, "+", "green")
+    new_graph = user.mermaid_join_nodes(graph, user.letters_2, user.letters_1, "+", "green")
     user.mermaid_set_graph(new_graph)
 
-squash {user.letter} through {user.letter}:
+squash <user.letters> through <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_join_nodes(graph, user.letter_2, user.letter_1, "-", "red")
+    new_graph = user.mermaid_join_nodes(graph, user.letters_2, user.letters_1, "-", "red")
     user.mermaid_set_graph(new_graph)
 
-break {user.letter} through {user.letter}:
+break <user.letters> through <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_unjoin_nodes(graph, user.letter_2, user.letter_1)
+    new_graph = user.mermaid_unjoin_nodes(graph, user.letters_2, user.letters_1)
     user.mermaid_set_graph(new_graph)
 
-wipe {user.letter}:
+wipe <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_delete_node(graph, user.letter)
+    new_graph = user.mermaid_delete_node(graph, user.letters)
     user.mermaid_set_graph(new_graph)
 
-style important {user.letter}:
+style important <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_style_node(graph, user.letter, "fill:#ffaaaa")
+    new_graph = user.mermaid_style_node(graph, user.letters, "fill:#ffaaaa")
     user.mermaid_set_graph(new_graph)
 
-style normal {user.letter}:
+style normal <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_style_node(graph, user.letter, "")
+    new_graph = user.mermaid_style_node(graph, user.letters, "")
     user.mermaid_set_graph(new_graph)
 
-style trivial {user.letter}:
+style trivial <user.letters>:
     graph = user.mermaid_parse_graph()
-    new_graph = user.mermaid_style_node(graph, user.letter, "fill:transparent,stroke:none")
+    new_graph = user.mermaid_style_node(graph, user.letters, "fill:transparent,stroke:none")
     user.mermaid_set_graph(new_graph)
