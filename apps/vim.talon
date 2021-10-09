@@ -28,8 +28,7 @@ ddent:
 
 swap:
     key(escape)
-    insert(":Files")
-    key(return)
+    key("ctrl-6")
 
 swap recent:
     key(escape)
