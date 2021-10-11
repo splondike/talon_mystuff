@@ -64,6 +64,7 @@ go row <digit_string>:
     key(escape)
     insert(":" + digit_string)
     key(enter)
+    key(^)
 
 go symbol <user.any_alphanumeric_key>:
     key(escape)
@@ -84,6 +85,10 @@ replace between quote:
 
 replace between paren:
     insert("rs(")
+
+back word:
+    user.vim_normal_mode()
+    key(l)
 
 jump back:
     "?"

@@ -41,6 +41,14 @@ class VimActions:
         if down_times != 0:
             actions.key(f"down:{down_times}")
 
+    def vim_normal_mode():
+        """
+        Change vim to normal mode
+        """
+
+        # Do nothing, and trick Talon into not complaining
+        a = 1
+
 
 @ctx.action_class("win")
 class VimWinActions:
@@ -67,6 +75,11 @@ class VimUserActions:
 
     def paste(text: str):
         actions.insert(text)
+
+    def vim_normal_mode():
+        actions.key("escape")
+        # Can take vim a little to be ready for normal keys
+        actions.sleep(0.1)
 
 
 undo_checkpointer = None
