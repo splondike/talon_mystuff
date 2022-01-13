@@ -2,12 +2,12 @@ title: /^VIM i/
 -
 spammer: ", "
 
-slapper:
+pour this:
     key(end)
     key(enter)
 
 complete [next]: key(ctrl-n)
-complete previous: key(ctrl-p)
+complete : key(ctrl-p)
 
 action(edit.redo):
     key(ctrl-o shift-z)

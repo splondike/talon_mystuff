@@ -12,16 +12,16 @@ settings():
 # Selection colours (find text within these)
 # Background colours (drop these right at start)
 
-save that:
+file save:
     key(escape)
     insert(":w")
     key(enter)
 
-edit file:
+file edit:
     key(escape)
     insert(":e ")
 
-ddent:
+chuck line:
     key(escape)
     key('d')
     key('d')

@@ -12,3 +12,5 @@ push:
     key(end)
     insert(":")
     key(enter)
+
+state lambda: "lambda"
