@@ -23,11 +23,11 @@ outline show:
     # This is to give keyboard focus so we can search
     repeat(1)
 
-menu show:
-    key(alt:down alt:up)
-
 terminal show:
     key(ctrl-`)
+
+mark <number_small>: key("ctrl-shift-{number_small}")
+jump <number_small>: key("ctrl-{number_small}")
 
 sidebar hide: user.vscode_and_wait("workbench.action.closeSidebar")
 
