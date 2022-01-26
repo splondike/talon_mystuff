@@ -6,7 +6,7 @@ swap files: key(ctrl-p)
 
 swap recent: user.vscode_and_wait("workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup")
 
-search grep: key(ctrl-t)
+search grep: key(ctrl-shift-f)
 
 go row <digit_string>:
     key(ctrl-g)
@@ -29,6 +29,10 @@ terminal show:
 mark <number_small>: key("ctrl-shift-{number_small}")
 jump <number_small>: key("ctrl-{number_small}")
 
-sidebar hide: user.vscode_and_wait("workbench.action.closeSidebar")
+folder hide: user.vscode_and_wait("workbench.action.closeSidebar")
 
 file save: key(ctrl-s)
+
+folder select:
+    bounding_rectangle = user.mouse_helper_calculate_relative_rect("-319 78 -270 -1", "active_window")
+    user.mouse_helper_blob_picker(bounding_rectangle)
