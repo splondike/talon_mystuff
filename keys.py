@@ -1,36 +1,21 @@
-from talon import Context, registry, app
+from talon import Module, Context
 
+mod = Module()
+mod.list("mystuff_special_key", desc="extra special keys")
+mod.list("mystuff_symbol_key", desc="extra symbol keys")
 
 ctx = Context()
-ctx.matches = r"""
-os: linux
-"""
+ctx.lists["user.mystuff_special_key"] = {
+    "enta": "enter",
+}
+ctx.lists["user.mystuff_symbol_key"] = {
+    "semi": ";",
+}
 
-def _add_keys():
-    """
-    Put this in a launch listener so it runs after knausj
-    """
+@ctx.capture("user.special_key", rule="{user.special_key} | {user.mystuff_special_key}")
+def special_key(m):
+    return str(m)
 
-    # Add return as a first class alias for enter
-    my_special_key_list = {
-        k: v
-        for k, v in registry.lists['user.special_key'][0].items()
-    }
-    my_special_key_list['enta'] = 'enter'
-    ctx.lists['self.special_key'] = my_special_key_list
-
-    my_symbol_key_list = {
-        k: v
-        for k, v in registry.lists['user.symbol_key'][0].items()
-    }
-    my_symbol_key_list['semi'] = ';'
-    ctx.lists['self.symbol_key'] = my_symbol_key_list
-
-    my_punctuation_key_list = {
-        k: v
-        for k, v in registry.lists['user.punctuation'][0].items()
-    }
-    my_punctuation_key_list['semi'] = ';'
-    ctx.lists['self.punctuation'] = my_punctuation_key_list
-
-app.register("launch", _add_keys)
+@ctx.capture("user.symbol_key", rule="{user.symbol_key} | {user.mystuff_symbol_key}")
+def symbol_key(m):
+    return str(m)
