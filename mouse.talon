@@ -16,7 +16,7 @@ mouse up:
 
 main down:
     user.mouse_helper_move_active_window_relative(".", ".")
-    user.mouse_scroll_down(0.2)
+    mouse_scroll(1)
 main up:
     user.mouse_helper_move_active_window_relative(".", ".")
-    user.mouse_scroll_up(0.2)
+    mouse_scroll(-1)
