@@ -5,7 +5,7 @@ import pathlib
 import subprocess
 import time
 
-from talon import Module, actions, ui, canvas, screen
+from talon import Module, Context, actions, ui, canvas, screen
 from talon.types import Rect
 
 
@@ -16,6 +16,8 @@ setting_talon_file = mod.setting(
     desc="The file you want to keep your macros in",
     default=None
 )
+
+ctx = Context()
 
 def get_full_macro_file_path():
     maybe_path = setting_talon_file.get()
@@ -36,9 +38,9 @@ def update_file(filename, contents):
     pathlib.Path(filename).touch()
 
 
-def append_line(talonscript_lines: List[str], command: str = "micro play:"):
+def append_lines(talonscript_lines: List[str], command: str = "macro play:"):
     """
-    Appends the given talonscript line to the bottom of the specified Talon command
+    Appends the given talonscript lines to the bottom of the specified Talon command
     """
 
     talonscript_lines = ["    " + l for l in talonscript_lines]
@@ -83,7 +85,7 @@ def append_line(talonscript_lines: List[str], command: str = "micro play:"):
     update_file(filename, "\n".join(output_lines))
 
 
-def reset_macro(command: str = "micro play:"):
+def reset_macro(command: str = "macro play:"):
     filename = get_full_macro_file_path()
     output_lines = []
 
@@ -129,39 +131,23 @@ class Actions:
         elif action == "view":
             subprocess.Popen(["/home/normal/bin/mine/talon-macro-file", "view", get_full_macro_file_path()])
 
-    def macro_reset():
+    def macro_append_special_command(type: str, args: str=""):
         """
-        Resets the default macro
-        """
-
-        reset_macro()
-
-    def macro_append(type: str, args: str=""):
-        """
-        Builds and adds the given command to the bottom of the default "micro play" command
+        Builds and adds the given command to the bottom of the default "custom macro play" command
         """
 
-        if type == "mouse click relative":
+        if type == "mouse jump relative":
             xpos, ypos = mouse_helper_find_active_window_relative()
-            append_line([
-                "user.mouse_helper_position_save()",
+            append_lines([
                 f"user.mouse_helper_move_active_window_relative(\"{xpos}\", \"{ypos}\")",
+                # Short sleep for convenience with hover or clicking delays
                 "sleep(16ms)",
-                "mouse_click(0)",
-                "sleep(16ms)",
-                "user.mouse_helper_position_restore()",
             ])
-        elif type == "sleep":
-            append_line(["sleep(100ms)"])
         elif type == "screen change":
             dimension = 10
             x = actions.mouse_x() - dimension//2
             y = actions.mouse_y() - dimension//2
-            append_line([f"user.macro_wait_region_change(\"{x} {y} {x+dimension} {y+dimension}\")"])
-        elif type == "port":
-            append_line([f"user.system_command(\"i3-msg workspace {args}\")"])
-        elif type == "key":
-            append_line([f"key(\"{args}\")"])
+            append_lines([f"user.macro_wait_region_change(\"{x} {y} {x+dimension} {y+dimension}\")"])
 
     def macro_wait_region_change(rect: Union[Rect, str], timeout: int=3):
         """
@@ -174,7 +160,7 @@ class Actions:
 
         if type(rect) == str:
             # Don't actually support the full syntax yet, I'll probably move this action to the
-            # package
+            # talon_ui_helper package
             assert("-" not in rect)
             bits = [int(i) for i in rect.split(" ")]
             rect = Rect(bits[0], bits[1], bits[2] - bits[0], bits[3] - bits[0])
@@ -189,3 +175,27 @@ class Actions:
             time.sleep(0.1)
 
         raise RuntimeError(f"Timeout elapsed while waiting for change in {rect}")
+
+
+@ctx.action_class("user")
+class OverriddenActions:
+    def macro_record():
+        reset_macro()
+        actions.next()
+
+    def macro_append_command(command: List[str]):
+        if command[0] == "macro":
+            return
+
+        remaps = [
+            ("touch", ["mouse_click(0)", "sleep(16ms)"]),
+            ("righty", ["mouse_click(1)", "sleep(16ms)"]),
+        ]
+
+        command_str = " ".join(command)
+        result = [f"mimic(\"{command_str}\")"]
+        for needle, replacement in remaps:
+            if command_str == needle:
+                result = replacement
+
+        append_lines(result)
