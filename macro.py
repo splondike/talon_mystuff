@@ -158,6 +158,10 @@ class Actions:
             x = actions.mouse_x() - dimension//2
             y = actions.mouse_y() - dimension//2
             append_line([f"user.macro_wait_region_change(\"{x} {y} {x+dimension} {y+dimension}\")"])
+        elif type == "port":
+            append_line([f"user.system_command(\"i3-msg workspace {args}\")"])
+        elif type == "key":
+            append_line([f"key(\"{args}\")"])
 
     def macro_wait_region_change(rect: Union[Rect, str], timeout: int=3):
         """

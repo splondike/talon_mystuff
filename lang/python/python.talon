@@ -14,3 +14,4 @@ push:
     key(enter)
 
 state lambda: "lambda"
+op in: " in "
