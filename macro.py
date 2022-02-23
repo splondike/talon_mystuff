@@ -183,8 +183,8 @@ class OverriddenActions:
         reset_macro()
         actions.next()
 
-    def macro_append_command(command: List[str]):
-        if command[0] == "macro":
+    def macro_append_command(words: List[str]):
+        if words[0] == "macro":
             return
 
         remaps = [
@@ -192,7 +192,7 @@ class OverriddenActions:
             ("righty", ["mouse_click(1)", "sleep(16ms)"]),
         ]
 
-        command_str = " ".join(command)
+        command_str = " ".join(words)
         result = [f"mimic(\"{command_str}\")"]
         for needle, replacement in remaps:
             if command_str == needle:
