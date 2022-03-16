@@ -27,7 +27,13 @@ def draw(can):
     left = 150
     top = rect.height
 
-    mode = "DM" if "dictation" in (scope.get("mode") or []) else "CM"
+    mode_set = (scope.get("mode") or [])
+    if "dictation" in mode_set:
+        mode = "DM"
+    elif "sleep" in mode_set:
+        mode = "SM"
+    else:
+        mode = "CM"
     time = calculate_last_phrase_time()
     label = f"{mode} {time} {last_phrase}"
 

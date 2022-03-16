@@ -1,4 +1,5 @@
 user.window_role: GtkFileChooserDialog
+user.file_chooser_dialog_type: save
 -
 seedy up: key(alt-up)
 

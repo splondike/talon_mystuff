@@ -45,12 +45,7 @@ side focus:
     user.mouse_helper_position_restore()
 
 side close:
-    user.mouse_helper_position_save()
-    user.mouse_helper_move_image_relative("2021-09-28_12.00.03.679682.png", 0)
-    sleep(0.05)
-    mouse_click(0)
-    sleep(0.05)
-    user.mouse_helper_position_restore()
+    key(ctrl-.)
 
 side down:
     user.mouse_helper_position_save()

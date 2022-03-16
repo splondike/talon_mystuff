@@ -15,3 +15,7 @@ state console:
     key(left:2)
 
 state interface: "interface "
+
+state throw: "throw "
+
+state type of: "typeof "

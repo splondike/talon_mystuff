@@ -1,3 +1,5 @@
+title: Signal
+-
 folder select:
     bounding_rectangle = user.mouse_helper_calculate_relative_rect("10 73 57 -3", "active_window")
     user.mouse_helper_blob_picker(bounding_rectangle)

@@ -14,6 +14,19 @@ mouse up:
     user.mouse_helper_move_relative(0, -20)
     user.grid_close()
 
+mouse left small:
+    user.mouse_helper_move_relative(-5, 0)
+    user.grid_close()
+mouse right small:
+    user.mouse_helper_move_relative(5, 0)
+    user.grid_close()
+mouse down small:
+    user.mouse_helper_move_relative(0, 5)
+    user.grid_close()
+mouse up small:
+    user.mouse_helper_move_relative(0, -5)
+    user.grid_close()
+
 main down:
     user.mouse_helper_move_active_window_relative(".", ".")
     mouse_scroll(1)
