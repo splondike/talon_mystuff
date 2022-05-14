@@ -15,6 +15,6 @@ move win port ten: user.system_command("i3-msg move container to workspace 10")
 move win left: user.system_command("i3-msg move left")
 move win right: user.system_command("i3-msg move right")
 move win up: user.system_command("i3-msg move up")
-move win down: user.system_command"i3-msg move down")
+move win down: user.system_command("i3-msg move down")
 
 launch: key(alt-p)
