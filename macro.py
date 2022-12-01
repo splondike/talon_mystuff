@@ -133,7 +133,7 @@ class Actions:
 
     def macro_append_special_command(type: str, args: str=""):
         """
-        Builds and adds the given command to the bottom of the default "custom macro play" command
+        Builds and adds the given command to the bottom of the default "custom macro play"
         """
 
         if type == "mouse jump relative":
@@ -179,11 +179,14 @@ class Actions:
 
 @ctx.action_class("user")
 class OverriddenActions:
+    def pop():
+        actions.core.repeat_command(1)
+        
     def macro_record():
         reset_macro()
         actions.next()
 
-    def macro_append_command(words: List[str]):
+    def macro_append_command(words: list[str]):
         if words[0] == "macro":
             return
 

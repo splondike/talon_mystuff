@@ -9,12 +9,6 @@ pour this:
 complete [next]: key(ctrl-n)
 complete : key(ctrl-p)
 
-action(edit.redo):
-    key(ctrl-o shift-z)
-
-action(edit.undo):
-    key(ctrl-o z)
-
 jump back:
     key(escape)
     "?"

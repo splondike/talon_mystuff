@@ -82,6 +82,14 @@ class VimUserActions:
         actions.sleep(0.1)
 
 
+@ctx_insert.action_class("edit")
+class InsertModeEditActions:
+    def undo():
+        actions.key("ctrl-o z")
+
+    def redo():
+        actions.key("ctrl-o shift-z")
+
 undo_checkpointer = None
 def _register_undo_checkpointer(window):
     global undo_checkpointer
@@ -98,5 +106,19 @@ def _register_undo_checkpointer(window):
             "1s",
             _undo_checkpointer
         )
+
+@ctx_normal.action_class("edit")
+class NormalModeEditActions:
+    def undo():
+        actions.key("z")
+    
+    def redo():
+        actions.key("shift-z")
+
+    def indent_more():
+        actions.insert(">>")
+    
+    def indent_less():
+        actions.insert("<<")
 
 # ui.register("win_focus", _register_undo_checkpointer)

@@ -1,4 +1,3 @@
-action(user.pop): core.repeat_command(1)
 sleep: sleep(1s)
 
 macro file view: user.macro_show_macro_file("view")

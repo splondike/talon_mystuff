@@ -32,9 +32,6 @@ swap files:
     insert(":Files")
     key(return)
 
-action(edit.indent_less): "<<"
-action(edit.indent_more): ">>"
-
 search grep:
     key(escape)
     insert(":Rg ")
@@ -42,12 +39,6 @@ search grep:
 search grep <user.text>:
     key(escape)
     insert(":Rg {text}")
-
-action(edit.redo):
-    key(shift-z)
-
-action(edit.undo):
-    key(z)
 
 move row up: key(ctrl-f)
 move row down: key(ctrl-s)
