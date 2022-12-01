@@ -1,6 +1,7 @@
 app.exe: kitty
 -
 tag(): terminal
+tag(): user.generic_unix_shell
 clear word left:
     key(ctrl-w)
 clear word right:
