@@ -12,12 +12,13 @@ def get_active_window_role():
 
     process_result = subprocess.run(
         ["xprop", "-id", str(ui.active_window().id)],
-        check=True,
+        check=False,
         capture_output=True
-    ).stdout
-    for line in process_result.decode().splitlines():
-        if line.startswith("WM_WINDOW_ROLE"):
-            return line.split(" = \"")[1][:-1]
+    )
+    if process_result.returncode == 0:
+        for line in process_result.stdout.decode().splitlines():
+            if line.startswith("WM_WINDOW_ROLE"):
+                return line.split(" = \"")[1][:-1]
 
     return "unknown"
 
