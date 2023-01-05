@@ -1,0 +1,8 @@
+[MESSAGES CONTROL]
+disable=
+    no-method-argument,
+    missing-function-docstring,
+    missing-class-docstring,
+    missing-module-docstring,
+    too-few-public-methods,
+    import-error,
