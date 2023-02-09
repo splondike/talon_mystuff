@@ -1,5 +1,5 @@
 import subprocess
-from talon import Module, ui
+from talon import Module, ui, app
 
 
 mod = Module()
@@ -23,11 +23,11 @@ def get_active_window_role():
     return "unknown"
 
 
-@mod.scope
-def window_role_scope():
-    return {
-        "window_role": get_active_window_role()
-    }
+if app.platform == "linux":
+    @mod.scope
+    def window_role_scope():
+        return {
+            "window_role": get_active_window_role()
+        }
 
-
-ui.register("win_focus", lambda _: window_role_scope.update())
+    ui.register("win_focus", lambda _: window_role_scope.update())

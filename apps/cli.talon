@@ -1,5 +1,8 @@
 app.exe: kitty
 -
+git clone:
+    insert("git clone ")
+
 git fetch:
     insert("git fetch")
     key("enter")
@@ -25,8 +28,8 @@ git status:
 git checkout:
     insert("git checkout feature/")
 
-git push origin:
-    insert("git push origin ")
+git push:
+    insert("git push ")
 
 git diff:
     insert("git diff HEAD^..HEAD")

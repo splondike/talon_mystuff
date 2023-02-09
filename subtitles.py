@@ -5,7 +5,7 @@ since last utterance
 
 import math
 import datetime
-from talon import canvas, ui, speech_system, scope, cron
+from talon import canvas, ui, speech_system, scope, cron, app
 
 
 last_phrase = ""
@@ -24,8 +24,12 @@ def calculate_last_phrase_time():
     return " 1s"
 
 def draw(can):
-    left = 150
-    top = rect.height
+    if app.platform == "linux":
+        left = 150
+        top = rect.height
+    elif app.platform == "mac":
+        left = 700
+        top = 20
 
     mode_set = (scope.get("mode") or [])
     if "dictation" in mode_set:

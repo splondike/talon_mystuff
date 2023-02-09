@@ -1,3 +1,5 @@
+os: linux
+-
 # I don't use most of the commands defined in the knausj repository
 
 port <number_small>: user.system_command("i3-msg workspace {number_small}")

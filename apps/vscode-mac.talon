@@ -1,8 +1,9 @@
-title: /Visual Studio Code$/
+os: mac
+and app.bundle: com.microsoft.VSCode
 -
 swap: key(ctrl-tab)
 
-swap files: key(ctrl-p)
+swap files: key(super-p)
 
 swap recent: user.vscode_and_wait("workbench.action.showAllEditorsByMostRecentlyUsed")
 
@@ -29,24 +30,14 @@ project show:
     user.vscode_and_wait("workbench.view.explorer")
     user.vscode_and_wait("outline.removeView")
 
-mark <number_small>: key("ctrl-shift-{number_small}")
-jump <number_small>: key("ctrl-{number_small}")
+mark <number_small>: key("super-shift-{number_small}")
+jump <number_small>: key("super-{number_small}")
 
 folder hide: user.vscode_and_wait("workbench.action.closeSidebar")
 
-file save: key(ctrl-s)
-
-folder select:
-    bounding_rectangle = user.mouse_helper_calculate_relative_rect("-319 78 -270 -1", "active_window")
-    user.mouse_helper_blob_picker(bounding_rectangle)
+file save: key(super-s)
 
 tags expand: user.vscode_and_wait("editor.emmet.action.expandAbbreviation")
-
-execute that:
-    key(ctrl-s)
-    user.system_command("i3-msg focus left")
-    key(up enter)
-    user.system_command("i3-msg focus right")
 
 chip:
     edit.undo()
