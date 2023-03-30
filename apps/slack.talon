@@ -1,4 +1,5 @@
-title: /^Slack/
+title: /Slack$/
+title: /- Slack -/
 -
 main down:
     user.mouse_helper_position_save()

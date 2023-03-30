@@ -1,4 +1,5 @@
-title: /^Slack/
+title: /Slack$/
+title: /- Slack -/
 os: mac
 -
 side close:
