@@ -8,18 +8,37 @@ mod = Module()
 
 ctx = Context()
 ctx.matches = r"""
-title: /^VIM/
+title: /^VIM/i
 """
 
 ctx_normal = Context()
 ctx_normal.matches = r"""
-title: /^VIM n/
+title: /^VIM n/i
 """
 
 ctx_insert = Context()
 ctx_insert.matches = r"""
-title: /^VIM i/
+title: /^VIM i/i
 """
+
+ctx_visual = Context()
+ctx_visual.matches = r"""
+title: /^VIM v/i
+"""
+
+@mod.capture(rule="<user.letter> | <user.symbol_key> | numb <user.number_key>")
+def vim_jump_symbol(m) -> str:
+    """
+    Symbols we can jump to.
+    """
+
+    if hasattr(m, "letter"):
+        return m.letter
+    elif hasattr(m, "symbol_key"):
+        return m.symbol_key
+    else:
+        return m.number_key
+
 
 @mod.action_class
 class VimActions:
@@ -45,9 +64,7 @@ class VimActions:
         """
         Change vim to normal mode
         """
-
-        # Do nothing, and trick Talon into not complaining
-        a = 1
+        actions.skip()
 
 
 @ctx.action_class("win")
@@ -90,6 +107,48 @@ class InsertModeEditActions:
     def redo():
         actions.key("ctrl-o shift-z")
 
+    def indent_more():
+        actions.insert("ctrl-o >>")
+
+    def indent_less():
+        actions.insert("ctrl-o <<")
+
+    def line_insert_down():
+        actions.key("end enter")
+
+
+@ctx_visual.action_class("user")
+class VimUserActions:
+    def vim_normal_mode():
+        actions.key("escape")
+        # Can take vim a little to be ready for normal keys
+        actions.sleep(0.1)
+
+    def indent_more():
+        actions.insert(">>")
+
+    def indent_less():
+        actions.insert("<<")
+
+
+@ctx_normal.action_class("edit")
+class NormalModeEditActions:
+    def undo():
+        actions.key("z")
+
+    def redo():
+        actions.key("shift-z")
+
+    def indent_more():
+        actions.insert(">>")
+
+    def indent_less():
+        actions.insert("<<")
+
+    def line_insert_down():
+        actions.key("o")
+
+
 undo_checkpointer = None
 def _register_undo_checkpointer(window):
     global undo_checkpointer
@@ -106,19 +165,5 @@ def _register_undo_checkpointer(window):
             "1s",
             _undo_checkpointer
         )
-
-@ctx_normal.action_class("edit")
-class NormalModeEditActions:
-    def undo():
-        actions.key("z")
-    
-    def redo():
-        actions.key("shift-z")
-
-    def indent_more():
-        actions.insert(">>")
-    
-    def indent_less():
-        actions.insert("<<")
 
 # ui.register("win_focus", _register_undo_checkpointer)

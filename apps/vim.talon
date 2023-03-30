@@ -1,22 +1,17 @@
 title: /^VIM/
 -
-# Floodfill from mouse cursor, relative to window, relative to image, floodfill from text cursor
-# Selection colours (find text within these)
-# Background colours (drop these right at start)
-
 file save:
     key(escape)
     insert(":w")
     key(enter)
 
 file edit:
-    key(escape)
+    user.vim_normal_mode()
     insert(":e ")
 
-chuck line:
-    key(escape)
-    key('d')
-    key('d')
+file edit relative:
+    user.vim_normal_mode()
+    insert(":e;")
 
 swap:
     key(escape)
@@ -43,43 +38,31 @@ search grep <user.text>:
 move row up: key(ctrl-f)
 move row down: key(ctrl-s)
 
-go row <digit_string>:
-    key(escape)
+# Movement and editing, primarily anchored to line numbers.
+# jump take chuck change comment ?bring?. Probably want to abstract all the non-jump ones to avoid repetition.
+
+centre that:
+    user.vim_normal_mode()
+    key("h z")
+
+jump <user.vim_jump_symbol>:
+    user.vim_normal_mode()
+    key("f {vim_jump_symbol}")
+    sleep(0.1)
+
+jump <digit_string> [<user.vim_jump_symbol>]:
+    user.vim_normal_mode()
     insert(":" + digit_string)
     key(enter)
-    key(^)
+    sleep(0.1)
+    next = vim_jump_symbol or "escape"
+    key("f {next}")
+    sleep(0.1)
 
-go symbol <user.any_alphanumeric_key>:
-    key(escape)
-    insert("f")
-    insert(any_alphanumeric_key)
-
-select row <digits>:
+take <digits>:
+    user.vim_normal_mode()
     user.vim_select_rows(digits)
 
-select row <digits> through <digits>:
-    user.vim_select_rows(digits_1, digits_2)
-
-replace between dubquote:
-    insert('rs"')
-
-replace between quote:
-    insert("rs'")
-
-replace between paren:
-    insert("rs(")
-
-back word:
+take <digits> through <digits>:
     user.vim_normal_mode()
-    key(l)
-
-jump back:
-    "?"
-
-jump back <user.word>:
-    insert("?" + word)
-    key(enter)
-
-jump forward <user.word>:
-    insert("/" + word)
-    key(enter)
+    user.vim_select_rows(digits_1, digits_2)
