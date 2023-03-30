@@ -52,7 +52,8 @@ def draw(skcanvas):
         )
 
 
-if app.platform == "mac":
+# if app.platform == "mac":
+if False:
     space_info = calc_space_info()
 
     cell_width = 25
