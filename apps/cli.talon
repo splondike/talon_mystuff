@@ -89,7 +89,7 @@ change directory knaus:
     key(enter)
 
 change directory talon:
-    insert("cd ~/.talon/user/mystuff")
+    insert("cd ~/.talon/user/talon_mystuff")
     key(enter)
 
 seedy up: "cd ../"
@@ -113,3 +113,14 @@ file path insert:
 
 ship insert:
     key('shift-insert')
+
+cube context:
+    insert("kubectx")
+    key("enter")
+
+cube namespaces:
+    insert("kubectl get ns")
+    key("enter")
+
+cube pods:
+    insert("kubectl get pods --namespace=")
