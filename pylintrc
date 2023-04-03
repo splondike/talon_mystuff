@@ -1,6 +1,8 @@
 [MESSAGES CONTROL]
 disable=
     no-method-argument,
+    no-self-argument,
+    invalid-name,
     missing-function-docstring,
     missing-class-docstring,
     missing-module-docstring,

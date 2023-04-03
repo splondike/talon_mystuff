@@ -16,10 +16,18 @@ matcha hash:
     key(ctrl-alt-p h)
 matcha web:
     key(ctrl-alt-p y)
-matcha path:
+matcha file:
     key(ctrl-alt-p f)
 matcha kebab:
     key(ctrl-alt-p s)
+matcha copy hash:
+    key(ctrl-alt-c h)
+matcha copy web:
+    key(ctrl-alt-c y)
+matcha copy file:
+    key(ctrl-alt-c f)
+matcha copy kebab:
+    key(ctrl-alt-c s)
 
 buffer paginate:
     key(ctrl-alt-h)

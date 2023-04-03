@@ -8,7 +8,7 @@ dock block:
     insert('"""')
     key(up end enter)
 
-push:
+row push:
     key(end)
     insert(":")
     key(enter)
