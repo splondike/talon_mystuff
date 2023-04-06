@@ -1,18 +1,6 @@
 title: /Slack$/
 title: /- Slack -/
 -
-main down:
-    user.mouse_helper_position_save()
-    user.mouse_helper_move_active_window_relative(".", "-328")
-    mouse_scroll(5)
-    user.mouse_helper_position_restore()
-
-main up:
-    user.mouse_helper_position_save()
-    user.mouse_helper_move_active_window_relative(".", "-328")
-    mouse_scroll(-5)
-    user.mouse_helper_position_restore()
-
 folder select:
     bounding_rectangle = user.mouse_helper_calculate_relative_rect("18 195 47 -49", "active_window")
     user.mouse_helper_blob_picker(bounding_rectangle)

@@ -132,5 +132,5 @@ fold open:
 # Can probably quite often just bring a given line to the clipboard to work out
 # what to bring or select etc.
 
-# move row up: key(ctrl-f)
-# move row down: key(ctrl-s)
+move row up: key(ctrl-f)
+move row down: key(ctrl-s)

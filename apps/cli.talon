@@ -31,6 +31,10 @@ git checkout:
 git push:
     insert("git push ")
 
+get pull:
+    insert("git pull ")
+    key("enter")
+
 git diff:
     insert("git diff HEAD^..HEAD")
 

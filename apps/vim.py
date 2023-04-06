@@ -393,7 +393,7 @@ class VimEditActions:
 
     def find_next():
         actions.user.vim_normal_mode()
-        actions.key("ctrl-n")
+        actions.key("ctrl-i")
 
 
 @ctx.action_class("win")
