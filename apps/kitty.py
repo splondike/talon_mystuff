@@ -5,20 +5,14 @@ ctx.matches = """
 app.exe: kitty
 """
 
-@ctx.action_class("edit")
-class KittyActions:
-    def line_start():
-        actions.key("ctrl-a")
+ctx_no_vim = Context()
+ctx_no_vim.matches = """
+app.exe: kitty
+and not title: /^VIM/
+"""
 
-    def line_end():
-        actions.key("ctrl-e")
 
-    def word_left():
-        actions.key("alt-b")
-
-    def word_right():
-        actions.key("alt-f")
-
-    def delete_line():
-        actions.edit.line_start()
-        actions.key("ctrl-k")
+@ctx_no_vim.action_class("edit")
+class Actions:
+    def paste():
+        actions.key("ctrl-alt-v")

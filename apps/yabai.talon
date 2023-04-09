@@ -15,4 +15,5 @@ move win up: user.system_command("/opt/homebrew/bin/yabai -m window --warp north
 move win down: user.system_command("/opt/homebrew/bin/yabai -m window --warp south")
 
 launch: key(alt-p)
+launch term: key(alt-enter)
 win kill: user.system_command("/opt/homebrew/bin/yabai -m window --close")

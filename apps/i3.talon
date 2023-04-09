@@ -20,3 +20,4 @@ move win up: user.system_command("i3-msg move up")
 move win down: user.system_command("i3-msg move down")
 
 launch: key(alt-p)
+launch term: key(alt-enter)

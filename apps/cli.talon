@@ -63,7 +63,7 @@ docker compose up:
     key("enter")
 
 run vim:
-    insert("vim")
+    insert("nvim")
     key("enter")
 
 run my sequel:
@@ -96,20 +96,26 @@ change directory talon:
     insert("cd ~/.talon/user/talon_mystuff")
     key(enter)
 
-seedy up: "cd ../"
+cd up: "cd ../"
 
-seedy up <number_small>$:
+cd up <number_small>$:
     dots = user.repeat_text("../", number_small)
     insert("cd " + dots)
 
-seedy search$:
+cd search$:
     # Uses fzf's bash completion with `fd` to change directory
     key(alt-c)
 
-seedy search <phrase>$:
+cd search <phrase>$:
     # Uses fzf's bash completion with `fd` to change directory
     key(alt-c)
     insert(phrase)
+
+cd change:
+    insert("cd ")
+    key(tab tab)
+    sleep(0.1)
+    key(ctrl-alt-p w)
 
 file path insert:
     # Uses fzf's bash completion with `fd` to insert a file path

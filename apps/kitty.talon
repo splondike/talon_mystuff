@@ -1,6 +1,7 @@
 app.exe: kitty
 -
 tag(): terminal
+tag(): user.readline
 tag(): user.generic_unix_shell
 
 settings():
