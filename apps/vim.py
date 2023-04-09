@@ -2,12 +2,10 @@
 Python code related to vim
 """
 
-# Post equals dubquote
-
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List, Union
 import re
 
-from talon import actions, cron, ui, clip, Context, Module
+from talon import actions, cron, ui, clip, Context, Module, speech_system
 
 mod = Module()
 
@@ -16,40 +14,52 @@ ctx.matches = r"""
 title: /^VIM/i
 """
 
-ctx_normal = Context()
-ctx_normal.matches = r"""
-title: /^VIM n/i
-"""
-
-ctx_insert = Context()
-ctx_insert.matches = r"""
-title: /^VIM i/i
-"""
-
-ctx_visual = Context()
-ctx_visual.matches = r"""
-title: /^VIM v/i
-"""
-
 mod.list("vim_text_object", desc="Text objects in vim")
 
 ctx.lists["self.vim_text_object"] = {
     "word": "s w",
     "end": "$",
+    "start": "^",
     "subscript": "s ]",
     "args": "s )",
     "brace": "s }",
     "angle": "s <",
+    "outer angle": "a <",
     "string": "s '",
     "outer string": "a '",
     "dub string": "s \"",
     "outer dub string": "a \"",
     "item": "a a",
+    "paragraph": "s p",
 }
 
 
+# Used internally in actions to save and restore the cursor position
+INTERNAL_MARK = "z"
+
+
+# We swap vim modes too quickly for Talon to keep track via the
+# window title so within a phrase we track it manually ourselves
+current_mode = None
+
+
+def setup_mode(_):
+    global current_mode
+    title = actions.win.title()
+    if title.startswith("VIM"):
+        mode, _, _, _ = _parse_title_data()
+        current_mode = mode
+    else:
+        current_mode = None
+
+
+# TODO: Consider turning this off using a similar technique to disciples 2
+# when we're not in Vim
+speech_system.register("pre:phrase", setup_mode)
+
+
 @mod.capture(
-    rule="([abs] <digits>) | ([<digits>] [post] (<user.letter>+ | numb <user.number_key>+ | <user.symbol_key>) [(twice|thrice)])"
+    rule="([abs] <digits>) | ([<digits>] [post] (<user.letter>+ | numb <user.number_key>+ | <user.symbol_key>) [(second|third|fourth)])"
 )
 def vim_jump_position(m) -> Dict[str, Any]:
     """
@@ -60,7 +70,7 @@ def vim_jump_position(m) -> Dict[str, Any]:
     then the options in parentheses are:
         * the first letters or numbers of a word/token.
         * a symbol key
-    twice|thrice say to go to the second or third such match
+    second|third say to go to the second or third such match
     """
 
     if hasattr(m, "letter_list"):
@@ -77,9 +87,9 @@ def vim_jump_position(m) -> Dict[str, Any]:
         target_chars = []
 
     repeated = 0
-    if "twice" in m:
+    if "second" in m:
         repeated = 1
-    elif "thrice" in m:
+    elif "third" in m:
         repeated = 2
 
     return {
@@ -93,7 +103,12 @@ def vim_jump_position(m) -> Dict[str, Any]:
 
 
 @mod.capture(
-    rule="<digits> | (<digits> (<user.letter>+ | numb <user.number_key>+ | <user.symbol_key>))"
+    # TODO: Add in a text object as an optional finisher or matcher here
+    rule="""
+        <digits> |
+        (<digits> through <digits>) |
+        (<digits> (<user.letter>+ | numb <user.number_key>+) [(second|third)])
+    """
 )
 def vim_bring_range(m) -> Dict[str, Any]:
     """
@@ -104,6 +119,18 @@ def vim_bring_range(m) -> Dict[str, Any]:
         * the first letters or numbers of a word/token.
         * a symbol key
     """
+
+    if len(m) == 1:
+        return {
+            "range_type": "line",
+            "line": m.digits
+        }
+    elif len(m) == 3 and m[1] == "through":
+        return {
+            "range_type": "line_range",
+            "line_start": m.digits_1,
+            "line_end": m.digits_2
+        }
 
     if hasattr(m, "letter_list"):
         target_type = "word"
@@ -118,11 +145,16 @@ def vim_bring_range(m) -> Dict[str, Any]:
         target_type = "none"
         target_chars = []
 
+    repeated = 0
+    if "second" in m:
+        repeated = 1
+    elif "third" in m:
+        repeated = 2
+
     return {
+        "range_type": "token",
         "line": m.digits,
-        "line_is_absolute": False,
-        "is_post": False,
-        "repeated": 0,
+        "repeated": repeated,
         "target_type": target_type,
         "target_chars": target_chars
     }
@@ -159,14 +191,14 @@ def _calculate_smart_line(uttered_line, is_absolute, curr_line, max_lines) -> in
             closest = option
 
     if closest is None:
-        raise RuntimeError("Couldn't find line matching {uttered_line}")
+        raise RuntimeError(f"Couldn't find line matching {uttered_line}")
 
     return closest
 
 
 def _calculate_pos(
         text, target_type, target_chars,
-        enable_iter=False, orig_col=1, repeated=0
+        enable_iter=False, orig_col=0, repeated=0
         ) -> Optional[Tuple[int, int]]:
 
     if target_type == "none":
@@ -190,7 +222,7 @@ def _calculate_pos(
         for match in re.finditer(pattern, text, flags=re.IGNORECASE):
             spans.append((
                 match.start() + 1,
-                match.end() + 1
+                match.end()
             ))
     else:
         return None
@@ -209,13 +241,13 @@ def _calculate_pos(
 
 @mod.action_class
 class VimActions:
-    def vim_jump(target: Dict[str, Any]):
+    def vim_jump(target: Dict[str, Any]) -> int:
         """
         Jump to the given position
         """
 
-        actions.user.vim_normal_mode()
         _, orig_line, orig_col, max_lines = _parse_title_data()
+        actions.user.vim_set_mark(INTERNAL_MARK)
 
         if target["line"] != -1:
             target_line = _calculate_smart_line(
@@ -225,31 +257,29 @@ class VimActions:
                 max_lines
             )
             is_same_line = target_line == orig_line
-            line_str = str(target_line)
-            actions.insert(f"{line_str}G")
+            if not is_same_line:
+                actions.user.vim_go_line(target_line)
         else:
             is_same_line = True
 
         if target["target_type"] == "none":
-            return
+            return -1
 
-        with clip.revert():
-            actions.key("C")
-            # There's a slight race condition with vim setting the clipboard
-            # so give it a bit more margin for error
-            actions.sleep("50ms")
-            line_text = clip.text()
-            maybe_pos = _calculate_pos(
-                line_text,
-                target["target_type"],
-                target["target_chars"],
-                is_same_line,
-                orig_col,
-                repeated=target["repeated"]
-            )
+        with clip.capture() as cap:
+            actions.user.vim_copy_line()
+
+        line_text = cap.text()
+        maybe_pos = _calculate_pos(
+            line_text,
+            target["target_type"],
+            target["target_chars"],
+            is_same_line,
+            orig_col,
+            repeated=target["repeated"]
+        )
 
         if maybe_pos is None:
-            return
+            return -1
 
         pos = maybe_pos[1] if target["is_post"] else maybe_pos[0]
         _, _, curr_col, _ = _parse_title_data()
@@ -260,129 +290,225 @@ class VimActions:
         # calculation from the current cursor pos
         diff = pos - curr_col
         if diff < 0:
-            actions.insert(str(abs(diff)))
-            actions.key("left")
+            actions.user.vim_escape_insert_keys(
+                " ".join(str(abs(diff))) + " left"
+            )
         elif diff > 0:
-            actions.insert(str(abs(diff)))
-            actions.key("right")
+            actions.user.vim_escape_insert_keys(
+                " ".join(str(abs(diff))) + " right"
+            )
         else:
             pass
+
+        return 0 if target["is_post"] else 1
 
     def vim_bring(target: Dict[str, Any]):
         """
         Bring the given range to the current cursor position
         """
 
-        actions.user.vim_normal_mode()
         _, orig_line, orig_col, max_lines = _parse_title_data()
+        calc_line = lambda line: _calculate_smart_line(line, False, orig_line, max_lines)
 
-        if target["line"] != -1:
-            target_line = _calculate_smart_line(
-                target["line"],
-                target["line_is_absolute"],
-                orig_line,
-                max_lines
+        if target["range_type"] == "line":
+            target_line = calc_line(target["line"])
+            actions.user.vim_set_mark(INTERNAL_MARK)
+            if target_line != orig_line:
+                actions.user.vim_go_line(target_line)
+            actions.user.vim_copy_line()
+            actions.user.vim_go_mark(INTERNAL_MARK)
+            actions.user.vim_paste_after()
+        elif target["range_type"] == "line_range":
+            start_line = calc_line(target["line_start"])
+            end_line = calc_line(target["line_end"])
+            actions.user.vim_set_mark(INTERNAL_MARK)
+            if start_line != orig_line:
+                actions.user.vim_go_line(start_line)
+            actions.user.vim_visual_line_mode()
+            if end_line != start_line:
+                actions.user.vim_go_line(end_line)
+            actions.edit.copy()
+            actions.user.vim_go_mark(INTERNAL_MARK)
+            actions.user.vim_paste_after()
+        elif target["range_type"] == "token":
+            target_line = calc_line(target["line"])
+            actions.user.vim_set_mark(INTERNAL_MARK)
+            if target_line != orig_line:
+                actions.user.vim_go_line(target_line)
+
+            with clip.capture() as cap:
+                actions.user.vim_copy_line()
+
+            line_text = cap.text()
+            maybe_pos = _calculate_pos(
+                line_text,
+                target["target_type"],
+                target["target_chars"],
+                enable_iter=True,
+                repeated=target["repeated"]
             )
-            is_same_line = target_line == orig_line
-            line_str = str(target_line)
-            actions.insert(f"{line_str}G")
-        else:
-            is_same_line = True
+            if maybe_pos is None:
+                actions.user.vim_go_mark(INTERNAL_MARK)
+                return
 
-        if target["target_type"] == "none":
-            actions.key("C")
-            actions.sleep("500ms")
-            actions.key("` `")
-            actions.sleep("500ms")
-            # TODO: I think edit.paste() is still using the insert mode context or something? Using this explicit key works better.
-            actions.key("V")
-        else:
-            with clip.revert():
-                actions.key("C")
-                # There's a slight race condition with vim setting the clipboard
-                # so give it a bit more margin for error
-                actions.sleep("50ms")
-                line_text = clip.text()
-                maybe_pos = _calculate_pos(
-                    line_text,
-                    target["target_type"],
-                    target["target_chars"],
-                    is_same_line,
-                    orig_col,
-                    repeated=target["repeated"]
-                )
+            actions.user.vim_go_mark(INTERNAL_MARK)
+            text = line_text[maybe_pos[0]-1:maybe_pos[1]]
+            actions.user.vim_insert_mode()
+            # This is just a bit more reliable than using the
+            # clipboard
+            actions.insert(text)
 
-                if maybe_pos is None:
-                    return
+    def vim_visual_character_mode():
+        """
+        Change vim to visual character mode
+        """
+        global current_mode
 
-                _, _, curr_col, _ = _parse_title_data()
+        if current_mode == "n":
+            actions.key("a")
+        elif current_mode == "V":
+            actions.key("escape a")
+        elif current_mode == "i":
+            # This little dance keeps the cursor position the same
+            actions.key("escape ` ^")
+            actions.key("a")
 
-                # TODO: Janky slow way of doing this. Should work out how to
-                # either just insert the text or put it in the clipboard and
-                # paste
-                diff = maybe_pos[0] - curr_col
-                if diff < 0:
-                    actions.insert(str(abs(diff)))
-                    actions.key("left")
-                elif diff > 0:
-                    actions.insert(str(abs(diff)))
-                    actions.key("right")
-                else:
-                    pass
-                actions.key("a")
-                actions.key(f"right:{maybe_pos[1] - maybe_pos[0] - 1}")
-                actions.key("c")
-                actions.sleep("50ms")
+        current_mode = "v"
 
-                actions.key("` `")
-                actions.edit.paste()
+    def vim_visual_line_mode():
+        """
+        Change vim to visual line mode
+        """
+        global current_mode
 
+        if current_mode == "n":
+            actions.key("A")
+        elif current_mode == "v":
+            actions.key("escape A")
+        elif current_mode == "i":
+            # This little dance keeps the cursor position the same
+            actions.key("escape ` ^")
+            actions.key("A")
+
+        current_mode = "V"
+
+    def vim_set_mode(mode: str):
+        """
+        Changed vim to the indicated mode
+        """
+        global current_mode
+
+        current_mode = mode
 
     def vim_normal_mode():
         """
         Change vim to normal mode
         """
-        # TODO: Testing just always doing this since delays in Talon
-        # context switching slows down chaining a bit
-        actions.key("escape")
-        # Can take vim a little to be ready for normal keys
-        actions.sleep(0.1)
+        global current_mode
 
-    def vim_select_rows(start_row: int, end_row: int = -1):
+        if current_mode == "i":
+            # This little dance keeps the cursor position the same
+            actions.key("escape ` ^")
+            # Can take vim a little to be ready for normal keys
+            actions.sleep(0.1)
+        elif current_mode in ("v", "V"):
+            actions.key("escape")
+
+        current_mode = "n"
+
+    def vim_insert_mode(before_cursor: int = 1):
         """
-        Selects rows start_row to end_row
+        Change vim to insert mode. If before_cursor == 1 and in normal
+        mode, then insert before the cursor, if == 0 then after,
+        otherwise do nothing.
         """
-        if end_row == -1:
-            smaller = start_row
-            down_times = 0
+        global current_mode
+
+        if before_cursor not in (1, 0):
+            return
+
+        if current_mode == "i":
+            return
+
+        if current_mode in ("v", "V"):
+            actions.key("escape")
+
+        if before_cursor == 1:
+            actions.key("s")
         else:
-            smaller = min(start_row, end_row)
-            down_times = max(start_row, end_row) - smaller
+            actions.key("t")
 
-        actions.key("escape")
-        actions.insert(f":{smaller}")
-        actions.key("enter")
-        actions.key("shift-a")
-        if down_times != 0:
-            actions.key(f"down:{down_times}")
+        current_mode = "i"
+
+    def vim_escape_insert_keys(key_blocks: Union[str, List[str]]):
+        """
+        Presses the given Talon key string blocks, potentially
+        prefixing them with ctrl-o if we're in insert mode. Lets
+        you avoid unnesessary mode switching.
+        """
+
+        if current_mode == "i":
+            prefix = "ctrl-o "
+        else:
+            prefix = ""
+
+        if isinstance(key_blocks, str):
+            actions.key(prefix + key_blocks)
+        else:
+            for key_block in key_blocks:
+                actions.key(prefix + key_block)
+
+
+    def vim_go_line(line_number: int):
+        """
+        Goes to the specified line number
+        """
+        actions.user.vim_escape_insert_keys([" ".join(str(line_number) + "G")])
+
+    def vim_copy_line():
+        """
+        Copies the current line to the vim default register
+        """
+        actions.user.vim_escape_insert_keys("C")
+
+    def vim_set_mark(mark_name: str):
+        """
+        Sets a vim mark with the given name
+        """
+        actions.user.vim_escape_insert_keys("m " + mark_name)
+
+    def vim_go_mark(mark_name: str):
+        """
+        Jump to the given mark
+        """
+        actions.user.vim_escape_insert_keys("` " + mark_name)
+
+    def vim_paste_after():
+        """
+        Jump to the given mark
+        """
+        actions.user.vim_escape_insert_keys("V")
 
 
 @ctx.action_class("edit")
 class VimEditActions:
     def undo():
-        actions.key("z")
+        actions.user.vim_escape_insert_keys("z")
 
     def redo():
-        actions.key("shift-z")
+        actions.user.vim_escape_insert_keys("shift-z")
+
+    def copy():
+        actions.user.vim_escape_insert_keys("c")
 
     def paste():
-        actions.key("V")
+        actions.user.vim_escape_insert_keys("v")
 
     def indent_more():
-        actions.key("> >")
+        actions.user.vim_escape_insert_keys("> >")
 
     def indent_less():
-        actions.key("< <")
+        actions.user.vim_escape_insert_keys("< <")
 
     def find(text: str = None):
         actions.user.vim_normal_mode()
@@ -392,8 +518,7 @@ class VimEditActions:
             actions.key("enter")
 
     def find_next():
-        actions.user.vim_normal_mode()
-        actions.key("ctrl-i")
+        actions.user.vim_escape_insert_keys("ctrl-i")
 
 
 @ctx.action_class("win")
@@ -412,65 +537,3 @@ class VimWinActions:
             return filename[pos:]
         except ValueError:
             return ""
-
-
-@ctx_insert.action_class("user")
-class InsertUserActions:
-    def vim_normal_mode():
-        """
-        Change vim to normal mode
-        """
-        actions.key("escape ` ^")
-        # Can take vim a little to be ready for normal keys
-        actions.sleep(0.1)
-
-
-@ctx_insert.action_class("edit")
-class InsertEditActions:
-    def undo():
-        actions.key("ctrl-o z")
-
-    def redo():
-        actions.key("ctrl-o shift-z")
-
-    def paste():
-        actions.key("ctrl-o V")
-
-    def indent_more():
-        actions.key("ctrl-o > >")
-
-    def indent_less():
-        actions.key("ctrl-o < <")
-
-    def line_insert_down():
-        actions.key("end enter")
-
-
-@ctx_visual.action_class("user")
-class VisualUserActions:
-    pass
-
-
-@ctx_visual.action_class("edit")
-class VisualEditActions:
-    pass
-
-
-undo_checkpointer = None
-def _register_undo_checkpointer(window):
-    global undo_checkpointer
-
-    def _undo_checkpointer():
-        if window.title.startswith("VIM i"):
-            actions.key("ctrl-g u")
-
-    if undo_checkpointer is not None:
-        cron.cancel(undo_checkpointer)
-
-    if window.title.startswith("VIM"):
-        undo_checkpointer = cron.interval(
-            "1s",
-            _undo_checkpointer
-        )
-
-# ui.register("win_focus", _register_undo_checkpointer)

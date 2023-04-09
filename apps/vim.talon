@@ -1,5 +1,6 @@
 title: /^VIM/
 -
+tag(): user.stack_active
 settings():
     # Vim seems to get its keys jumbled above this speed
     key_wait = 2
@@ -21,116 +22,107 @@ swap:
     user.vim_normal_mode()
     key("ctrl-6")
 
-swap recent:
-    user.vim_normal_mode()
-    insert(":Buffers")
-    key(return)
+swap recent [<user.word>]:
+    user.vim_escape_insert_keys(", t")
+    insert(word or "")
 
-swap files:
-    user.vim_normal_mode()
-    insert(":Files")
-    key(return)
+swap files [<user.word>]:
+    user.vim_escape_insert_keys(", f")
+    insert(word or "")
 
-search grep:
-    user.vim_normal_mode()
-    insert(":Rg ")
+search grep [<user.word>]:
+    user.vim_escape_insert_keys(", g")
+    insert(word or "")
 
-search grep <user.text>:
-    user.vim_normal_mode()
-    insert(":Rg {text}")
+search functions [<user.word>]:
+    user.vim_escape_insert_keys(", d")
+    insert(word or "")
 
 centre that:
-    user.vim_normal_mode()
-    key("h z")
+    user.vim_escape_insert_keys("h z")
 
 chip:
     edit.undo()
 
-pour this:
-    user.vim_normal_mode()
-    key("o")
+pour that:
+    user.vim_escape_insert_keys("o")
+    user.vim_set_mode("i")
 
-mark:
-    user.vim_normal_mode()
-    key("m a")
+mark [<user.letter>]:
+    mark_name = letter or "a"
+    user.vim_escape_insert_keys("m {mark_name}")
 
-mark bat:
-    user.vim_normal_mode()
-    key("m b")
+insert:
+    user.vim_insert_mode()
+
+move row up: user.vim_escape_insert_keys("ctrl-f")
+move row down: user.vim_escape_insert_keys("ctrl-s")
 
 # Movement and editing, primarily anchored to line numbers.
-# jump take chuck change comment ?bring?. Probably want to abstract all the non-jump ones to avoid repetition.
 
-jump mark:
-    user.vim_normal_mode()
-    key("` a")
-
-jump mark bat:
-    user.vim_normal_mode()
-    key("` b")
+jump mark [<user.letter>]:
+    mark_name = letter or "a"
+    user.vim_escape_insert_keys("` {mark_name}")
 
 jump <user.vim_jump_position>:
     user.vim_jump(vim_jump_position)
 
+jump <user.vim_jump_position> insert:
+    is_start_of_word = user.vim_jump(vim_jump_position)
+    user.vim_insert_mode(is_start_of_word)
+
 change row:
     user.vim_normal_mode()
     key("r r")
+    user.vim_set_mode("i")
 
 change {user.vim_text_object}:
-    user.vim_normal_mode()
-    key("r {vim_text_object}")
+    user.vim_escape_insert_keys("r {vim_text_object}")
+    user.vim_set_mode("i")
 
 chuck row:
     user.vim_normal_mode()
     key("d d")
 
-take row:
+chuck {user.vim_text_object}:
     user.vim_normal_mode()
-    key("A")
+    key("d {vim_text_object}")
+
+take row:
+    user.vim_visual_line_mode()
 
 take {user.vim_text_object}:
     user.vim_normal_mode()
     key("a {vim_text_object}")
-
-# TODO: take mark pair to select between two marks. Good for folds
+    # TODO: This may not be correct for all text objects, some are
+    # line mode
+    user.vim_set_mode("v")
 
 bring <user.vim_bring_range>:
     user.vim_bring(vim_bring_range)
 
-# TODO: Finish folds
-fold that:
+pull:
+    edit.copy()
+    user.vim_go_mark("z")
+    edit.paste()
+
+# TODO: Finish comments
+comment that:
     user.vim_normal_mode()
-    key("h f")
+    key(, c c escape)
+
+fold that:
+    user.vim_escape_insert_keys("h f")
 
 fold open:
-    user.vim_normal_mode()
-    key("h o")
+    user.vim_escape_insert_keys("h o")
+
+fold close:
+    user.vim_escape_insert_keys("h c")
+
+fold chuck:
+    user.vim_escape_insert_keys("h d")
 
 # TODO:
 # * Got to have a way to pick a line in fzf. No option built in. Approaches are to add the feature, add in line num to the fzf input, exploit geom of terminal and draw with Talon. Probably the first is easiest.
-
-# bring 15 - Bring line 15
-# bring 15 through 20 - Bring lines 15 through 20
-# bring 15 red through right paren - Bring the token starting with 'r' through to the next right parenthesis
-# bring 15 red through gust each - Bring the token starting with 'r' through to the end of the next token staring with 'ge'
-# bring 15 dubquote - Bring the whole first double quoted string on the line
-# bring 15 args - Bring the whole first paren wrapped arguments (maybe multiline)
-# bring 15 block - Bring the whole block around line 15
-# take and change would be very similar to this I think
-
-# comment 15
-# comment 15 through 20
-# comment 15 block
-
-# Could use easymotion to select a word or a phrase to bring
-# Take, chuck, change would be the same as bring. comment would just have the 
-# lines stuff (and maybe block or function if somebody's made a good text object)
-# Can call the easymotion picker using (see autoload/EasyMotion.vim):
-# * call EasyMotion#S(1, 0, 2)
-# * call EasyMotion#User('myregex...', 0, 2, 0)
-# /\W\zssh.\{-}\Wr.\{-}\ze\W - match a token starting with sh up to the end of one starting with r
-# Can probably quite often just bring a given line to the clipboard to work out
-# what to bring or select etc.
-
-move row up: key(ctrl-f)
-move row down: key(ctrl-s)
+# * Might be able to use two different words for jumping up and down and thereby cover a range of twenty lines with a single number
