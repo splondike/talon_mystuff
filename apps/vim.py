@@ -4,6 +4,7 @@ Python code related to vim
 
 from typing import Dict, Any, Optional, Tuple, List, Union
 import re
+import subprocess
 
 from talon import actions, cron, ui, clip, Context, Module, speech_system
 
@@ -40,6 +41,7 @@ INTERNAL_MARK = "z"
 
 # We swap vim modes too quickly for Talon to keep track via the
 # window title so within a phrase we track it manually ourselves
+# TODO: I can probably remove all this and replace it with the RPC interface
 current_mode = None
 
 
@@ -47,7 +49,7 @@ def setup_mode(_):
     global current_mode
     title = actions.win.title()
     if title.startswith("VIM"):
-        mode, _, _, _ = _parse_title_data()
+        mode, _, _, _, _ = _parse_title_data()
         current_mode = mode
     else:
         current_mode = None
@@ -160,14 +162,15 @@ def vim_bring_range(m) -> Dict[str, Any]:
     }
 
 
-def _parse_title_data() -> Tuple[str, int, int]:
+def _parse_title_data() -> Tuple[str, int, int, str]:
     title = actions.win.title()
     if not title.startswith("VIM"):
         raise RuntimeError("Called when VIM not focussed")
 
-    _v, mode, line, col, max_lines, _ = title.split(" ", maxsplit=5)
+    _v, mode, line, col, max_lines, rest = title.split(" ", maxsplit=5)
+    _, rpc, _ = title.split(" - ")
 
-    return (mode, int(line), int(col), int(max_lines))
+    return (mode, int(line), int(col), int(max_lines), rpc)
 
 
 def _calculate_smart_line(uttered_line, is_absolute, curr_line, max_lines) -> int:
@@ -246,7 +249,8 @@ class VimActions:
         Jump to the given position
         """
 
-        _, orig_line, orig_col, max_lines = _parse_title_data()
+        _, orig_line, orig_col, max_lines, rpc_socket = _parse_title_data()
+        # For use with 'pull'
         actions.user.vim_set_mark(INTERNAL_MARK)
 
         if target["line"] != -1:
@@ -257,18 +261,18 @@ class VimActions:
                 max_lines
             )
             is_same_line = target_line == orig_line
-            if not is_same_line:
-                actions.user.vim_go_line(target_line)
         else:
             is_same_line = True
+            target_line = orig_line
 
         if target["target_type"] == "none":
+            actions.user.vim_move_cursor(target_line, rpc_socket=rpc_socket)
             return -1
 
-        with clip.capture() as cap:
-            actions.user.vim_copy_line()
-
-        line_text = cap.text()
+        line_text = actions.user.vim_get_line(
+            target_line,
+            rpc_socket=rpc_socket
+        )
         maybe_pos = _calculate_pos(
             line_text,
             target["target_type"],
@@ -282,23 +286,7 @@ class VimActions:
             return -1
 
         pos = maybe_pos[1] if target["is_post"] else maybe_pos[0]
-        _, _, curr_col, _ = _parse_title_data()
-
-        # <num>| uses screen columns, which doesn't work with wrap, hence
-        # press the relevant arrow key n times to move. Jumping to the
-        # start of the line first produces annoying flicker, so do this
-        # calculation from the current cursor pos
-        diff = pos - curr_col
-        if diff < 0:
-            actions.user.vim_escape_insert_keys(
-                " ".join(str(abs(diff))) + " left"
-            )
-        elif diff > 0:
-            actions.user.vim_escape_insert_keys(
-                " ".join(str(abs(diff))) + " right"
-            )
-        else:
-            pass
+        actions.user.vim_move_cursor(target_line, pos, rpc_socket=rpc_socket)
 
         return 0 if target["is_post"] else 1
 
@@ -307,7 +295,7 @@ class VimActions:
         Bring the given range to the current cursor position
         """
 
-        _, orig_line, orig_col, max_lines = _parse_title_data()
+        _, orig_line, orig_col, max_lines, _ = _parse_title_data()
         calc_line = lambda line: _calculate_smart_line(line, False, orig_line, max_lines)
 
         if target["range_type"] == "line":
@@ -464,6 +452,37 @@ class VimActions:
         Goes to the specified line number
         """
         actions.user.vim_escape_insert_keys([" ".join(str(line_number) + "G")])
+
+
+    def vim_call_rpc_function(expression: str, rpc_socket: str=None) -> str:
+        """
+        Runs the given Neovim expression on the given Neovim socket and
+        returns the result as a string
+        """
+
+        if rpc_socket is None:
+            _, _, _, _, rpc_socket = _parse_title_data()
+
+        # See ':h function-list'
+        # "execute('normal! dd') executes a normal mode thing without remapping
+        result = subprocess.run(
+            ["nvim", "--server", rpc_socket, "--remote-expr", expression],
+            capture_output=True,
+            check=True
+        )
+        return result.stderr.decode()
+
+    def vim_get_line(line_number: int, rpc_socket: str = None) -> str:
+        """
+        Grabs the given line number from the current buffer
+        """
+        return actions.user.vim_call_rpc_function(f"getline({line_number})", rpc_socket)
+
+    def vim_move_cursor(line_number: int, column_number: int = 1, rpc_socket: str = None) -> str:
+        """
+        Grabs the given line number from the current buffer
+        """
+        return actions.user.vim_call_rpc_function(f"cursor({line_number}, {column_number})", rpc_socket)
 
     def vim_copy_line():
         """

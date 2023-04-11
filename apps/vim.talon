@@ -1,6 +1,6 @@
 title: /^VIM/
 -
-tag(): user.stack_active
+tag(): user.code_mode_active
 settings():
     # Vim seems to get its keys jumbled above this speed
     key_wait = 2
@@ -83,6 +83,9 @@ change {user.vim_text_object}:
 chuck row:
     user.vim_normal_mode()
     key("d d")
+
+chuck that:
+    user.vim_escape_insert_keys("d")
 
 chuck {user.vim_text_object}:
     user.vim_normal_mode()
