@@ -3,6 +3,7 @@ from talon import Context, actions
 ctx = Context()
 ctx.matches = """
 app: firefox
+os: linux
 """
 
 
