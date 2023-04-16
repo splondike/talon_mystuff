@@ -129,3 +129,5 @@ fold chuck:
 # TODO:
 # * Got to have a way to pick a line in fzf. No option built in. Approaches are to add the feature, add in line num to the fzf input, exploit geom of terminal and draw with Talon. Probably the first is easiest.
 # * Might be able to use two different words for jumping up and down and thereby cover a range of twenty lines with a single number
+# * Add in a jump back command so that we can rotate backwards through a given long line when writing prose.
+# * Temporary rewrite rule. If I'm using a particular phrase or homophone all the time in a particular document it would be nice to temporarily add it to 'words to replace' or 'additional words'.
