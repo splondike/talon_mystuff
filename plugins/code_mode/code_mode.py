@@ -10,6 +10,10 @@ mod.list("code_mode_global_token", desc="Globally applicable tokens")
 # * Have a mode you get dropped in to automatically like dictation mode that lets you fluidly speak code
 # * Somehow parse a Ctags file: ctags -R --kinds-all=* to get the 
 # * Have a token that drops in a character that's easy to jump to for corrections
+# * Have the ability to go back and correct part of your utterance if it was wrong; we know exactly what we typed.
+# * Jump to subword (parse camel/title/snake case and jump to word)
+# * Correct the phrase 'prefix.prefix2' based on the highest probability of those two things together plus CoC style completion.
+# * Have stack things like 'class' drop you into title case automatically
 
 mod.tag("code_mode_active", desc="Activate the stack command")
 
