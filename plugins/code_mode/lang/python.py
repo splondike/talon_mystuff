@@ -11,6 +11,7 @@ tag: user.python
 
 ctx.lists["self.code_mode_lang_token"] = {
     "assign": "literal: = ",
+    "at sign": "literal:@",
     "equal to": "literal: == ",
     "colgap": "literal:: ",
     "if": "literal:if ",

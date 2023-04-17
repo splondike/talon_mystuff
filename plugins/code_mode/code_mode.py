@@ -13,7 +13,7 @@ mod.list("code_mode_global_token", desc="Globally applicable tokens")
 # * Have the ability to go back and correct part of your utterance if it was wrong; we know exactly what we typed.
 # * Jump to subword (parse camel/title/snake case and jump to word)
 # * Correct the phrase 'prefix.prefix2' based on the highest probability of those two things together plus CoC style completion.
-# * Have stack things like 'class' drop you into title case automatically
+# * Have stack things like 'class' swap to title case
 
 mod.tag("code_mode_active", desc="Activate the stack command")
 
