@@ -41,10 +41,12 @@ INTERNAL_MARK = "z"
 # TODO: Use the RPC for all key presses, and use them unmapped where possible to make this code
 # work regardless of people's custom config. Could probably also remove the
 # key_wait setting then
+# TODO: I'm getting some stalls with the RPC thing sometimes that are remedied by pressing escape
+# on the keyboard. Try and get a reproducible test case, perhaps it's operator pending mode?
 
 
 @mod.capture(
-    rule="([abs] <digits>) | ([<digits>] [post] (<user.letter>+ | numb <user.number_key>+ | <user.symbol_key>) [(second|third|fourth)])"
+    rule="([abs] <digits>) | ([[abs] <digits>] [post] (<user.letter>+ | numb <user.number_key>+ | <user.symbol_key>) [(second|third|fourth)])"
 )
 def vim_jump_position(m) -> Dict[str, Any]:
     """
