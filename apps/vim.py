@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional, Tuple, List, Union
 import re
 import subprocess
 
-from talon import actions, cron, ui, clip, Context, Module, speech_system
+from talon import actions, ui, clip, Context, Module
 
 mod = Module()
 
@@ -38,26 +38,9 @@ ctx.lists["self.vim_text_object"] = {
 # Used internally in actions to save and restore the cursor position
 INTERNAL_MARK = "z"
 
-
-# We swap vim modes too quickly for Talon to keep track via the
-# window title so within a phrase we track it manually ourselves
-# TODO: I can probably remove all this and replace it with the RPC interface
-current_mode = None
-
-
-def setup_mode(_):
-    global current_mode
-    title = actions.win.title()
-    if title.startswith("VIM"):
-        mode, _, _, _, _ = _parse_title_data()
-        current_mode = mode
-    else:
-        current_mode = None
-
-
-# TODO: Consider turning this off using a similar technique to disciples 2
-# when we're not in Vim
-speech_system.register("pre:phrase", setup_mode)
+# TODO: Use the RPC for all key presses, and use them unmapped where possible to make this code
+# work regardless of people's custom config. Could probably also remove the
+# key_wait setting then
 
 
 @mod.capture(
@@ -242,6 +225,17 @@ def _calculate_pos(
     return spans[matching_idx + repeated % len(spans)]
 
 
+def _fetch_buffer_dimensions() -> Tuple[int, int, int]:
+    """
+    Return the current line, column position, and max lines for
+    the current buffer
+    """
+    bits = actions.user.vim_call_rpc_function(
+        "join([line('.'), col('.'), line('$')], ' ')"
+    ).split(' ')
+    return tuple(map(int, bits))
+
+
 @mod.action_class
 class VimActions:
     def vim_jump(target: Dict[str, Any]) -> int:
@@ -249,7 +243,7 @@ class VimActions:
         Jump to the given position
         """
 
-        _, orig_line, orig_col, max_lines, rpc_socket = _parse_title_data()
+        orig_line, orig_col, max_lines = _fetch_buffer_dimensions()
         # For use with 'pull'
         actions.user.vim_set_mark(INTERNAL_MARK)
 
@@ -266,12 +260,11 @@ class VimActions:
             target_line = orig_line
 
         if target["target_type"] == "none":
-            actions.user.vim_move_cursor(target_line, rpc_socket=rpc_socket)
+            actions.user.vim_move_cursor(target_line)
             return -1
 
         line_text = actions.user.vim_get_line(
-            target_line,
-            rpc_socket=rpc_socket
+            target_line
         )
         maybe_pos = _calculate_pos(
             line_text,
@@ -286,7 +279,7 @@ class VimActions:
             return -1
 
         pos = maybe_pos[1] if target["is_post"] else maybe_pos[0]
-        actions.user.vim_move_cursor(target_line, pos, rpc_socket=rpc_socket)
+        actions.user.vim_move_cursor(target_line, pos)
 
         return 0 if target["is_post"] else 1
 
@@ -295,7 +288,7 @@ class VimActions:
         Bring the given range to the current cursor position
         """
 
-        _, orig_line, orig_col, max_lines, _ = _parse_title_data()
+        orig_line, orig_col, max_lines = _fetch_buffer_dimensions()
         calc_line = lambda line: _calculate_smart_line(line, False, orig_line, max_lines)
 
         if target["range_type"] == "line":
@@ -350,7 +343,7 @@ class VimActions:
         """
         Change vim to visual character mode
         """
-        global current_mode
+        current_mode = actions.user.vim_get_mode()
 
         if current_mode == "n":
             actions.key("a")
@@ -361,13 +354,11 @@ class VimActions:
             actions.key("escape ` ^")
             actions.key("a")
 
-        current_mode = "v"
-
     def vim_visual_line_mode():
         """
         Change vim to visual line mode
         """
-        global current_mode
+        current_mode = actions.user.vim_get_mode()
 
         if current_mode == "n":
             actions.key("A")
@@ -378,21 +369,18 @@ class VimActions:
             actions.key("escape ` ^")
             actions.key("A")
 
-        current_mode = "V"
-
-    def vim_set_mode(mode: str):
+    def vim_get_mode() -> str:
         """
-        Changed vim to the indicated mode
+        Get the current vim mode, one of 'n', 'i', 'v', 'V'
         """
-        global current_mode
 
-        current_mode = mode
+        return actions.user.vim_call_rpc_function("mode()")
 
     def vim_normal_mode():
         """
         Change vim to normal mode
         """
-        global current_mode
+        current_mode = actions.user.vim_get_mode()
 
         if current_mode == "i":
             # This little dance keeps the cursor position the same
@@ -402,15 +390,13 @@ class VimActions:
         elif current_mode in ("v", "V"):
             actions.key("escape")
 
-        current_mode = "n"
-
     def vim_insert_mode(before_cursor: int = 1):
         """
         Change vim to insert mode. If before_cursor == 1 and in normal
         mode, then insert before the cursor, if == 0 then after,
         otherwise do nothing.
         """
-        global current_mode
+        current_mode = actions.user.vim_get_mode()
 
         if before_cursor not in (1, 0):
             return
@@ -426,14 +412,13 @@ class VimActions:
         else:
             actions.key("t")
 
-        current_mode = "i"
-
     def vim_escape_insert_keys(key_blocks: Union[str, List[str]]):
         """
         Presses the given Talon key string blocks, potentially
         prefixing them with ctrl-o if we're in insert mode. Lets
         you avoid unnesessary mode switching.
         """
+        current_mode = actions.user.vim_get_mode()
 
         if current_mode == "i":
             prefix = "ctrl-o "
@@ -446,13 +431,11 @@ class VimActions:
             for key_block in key_blocks:
                 actions.key(prefix + key_block)
 
-
     def vim_go_line(line_number: int):
         """
         Goes to the specified line number
         """
         actions.user.vim_escape_insert_keys([" ".join(str(line_number) + "G")])
-
 
     def vim_call_rpc_function(expression: str, rpc_socket: str=None) -> str:
         """

@@ -46,7 +46,6 @@ chip:
 
 pour that:
     user.vim_escape_insert_keys("o")
-    user.vim_set_mode("i")
 
 mark [<user.letter>]:
     mark_name = letter or "a"
@@ -74,11 +73,9 @@ jump <user.vim_jump_position> insert:
 change row:
     user.vim_normal_mode()
     key("r r")
-    user.vim_set_mode("i")
 
 change {user.vim_text_object}:
     user.vim_escape_insert_keys("r {vim_text_object}")
-    user.vim_set_mode("i")
 
 chuck row:
     user.vim_normal_mode()
@@ -97,9 +94,6 @@ take row:
 take {user.vim_text_object}:
     user.vim_normal_mode()
     key("a {vim_text_object}")
-    # TODO: This may not be correct for all text objects, some are
-    # line mode
-    user.vim_set_mode("v")
 
 bring <user.vim_bring_range>:
     user.vim_bring(vim_bring_range)
