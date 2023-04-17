@@ -157,17 +157,6 @@ def vim_bring_range(m) -> Dict[str, Any]:
     }
 
 
-def _parse_title_data() -> Tuple[str, int, int, str]:
-    title = actions.win.title()
-    if not title.startswith("VIM"):
-        raise RuntimeError("Called when VIM not focussed")
-
-    _, modes, rpc = title.split(" | ")
-    mode, line, col, max_lines, *rest = modes.split(" ", maxsplit=5)
-
-    return (mode, int(line), int(col), int(max_lines), rpc)
-
-
 def _calculate_smart_line(uttered_line, is_absolute, curr_line, max_lines) -> int:
     if is_absolute or uttered_line >= 100:
         return uttered_line
@@ -462,14 +451,17 @@ class VimActions:
         """
         actions.user.vim_escape_insert_keys([" ".join(str(line_number) + "G")])
 
-    def vim_call_rpc_function(expression: str, rpc_socket: str=None) -> str:
+    def vim_call_rpc_function(expression: str) -> str:
         """
         Runs the given Neovim expression on the given Neovim socket and
         returns the result as a string
         """
 
-        if rpc_socket is None:
-            _, _, _, _, rpc_socket = _parse_title_data()
+        title = actions.win.title()
+        if not title.startswith("VIM"):
+            raise RuntimeError("Called when VIM not focussed")
+
+        _, rpc_socket = title.split(" | ")
 
         # See ':h function-list'
         # "execute('normal! dd') executes a normal mode thing without remapping
@@ -480,17 +472,17 @@ class VimActions:
         )
         return result.stderr.decode()
 
-    def vim_get_line(line_number: int, rpc_socket: str = None) -> str:
+    def vim_get_line(line_number: int) -> str:
         """
         Grabs the given line number from the current buffer
         """
-        return actions.user.vim_call_rpc_function(f"getline({line_number})", rpc_socket)
+        return actions.user.vim_call_rpc_function(f"getline({line_number})")
 
-    def vim_move_cursor(line_number: int, column_number: int = 1, rpc_socket: str = None) -> str:
+    def vim_move_cursor(line_number: int, column_number: int = 1, ) -> str:
         """
         Grabs the given line number from the current buffer
         """
-        return actions.user.vim_call_rpc_function(f"cursor({line_number}, {column_number})", rpc_socket)
+        return actions.user.vim_call_rpc_function(f"cursor({line_number}, {column_number})")
 
     def vim_copy_line():
         """
