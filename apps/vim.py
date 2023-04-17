@@ -167,8 +167,8 @@ def _parse_title_data() -> Tuple[str, int, int, str]:
     if not title.startswith("VIM"):
         raise RuntimeError("Called when VIM not focussed")
 
-    _v, mode, line, col, max_lines, rest = title.split(" ", maxsplit=5)
-    _, rpc, _ = title.split(" - ")
+    _, modes, rpc = title.split(" | ")
+    mode, line, col, max_lines, *rest = modes.split(" ", maxsplit=5)
 
     return (mode, int(line), int(col), int(max_lines), rpc)
 
@@ -466,7 +466,7 @@ class VimActions:
         # See ':h function-list'
         # "execute('normal! dd') executes a normal mode thing without remapping
         result = subprocess.run(
-            ["nvim", "--server", rpc_socket, "--remote-expr", expression],
+            ["nvim", "--headless", "--server", rpc_socket, "--remote-expr", expression],
             capture_output=True,
             check=True
         )
@@ -549,7 +549,7 @@ class VimWinActions:
             # when swapping off the window
             return ""
 
-        _, filename = title.rsplit(" ", 1)
+        filename = title[4:title.find(" | ")]
 
         try:
             pos = filename.index(".")
