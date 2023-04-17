@@ -95,6 +95,9 @@ take {user.vim_text_object}:
     user.vim_normal_mode()
     key("a {vim_text_object}")
 
+take <user.vim_line_range>:
+    user.vim_take_line_range(vim_line_range)
+
 bring <user.vim_bring_range>:
     user.vim_bring(vim_bring_range)
 
@@ -106,6 +109,10 @@ pull:
 # TODO: Finish comments
 comment that:
     user.vim_normal_mode()
+    key(, c c escape)
+
+comment <user.vim_line_range>:
+    user.vim_take_line_range(vim_line_range)
     key(, c c escape)
 
 fold that:

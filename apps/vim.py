@@ -87,6 +87,18 @@ def vim_jump_position(m) -> Dict[str, Any]:
     }
 
 
+@mod.capture(rule="<digits> | (<digits> through <digits>)")
+def vim_line_range(m) -> Dict[str, Any]:
+    """
+    Capture a range of one or more lines
+    """
+
+    return {
+        "start_line": m.digits_1,
+        "end_line": m.digits_2 if hasattr(m, "digits_2") else None
+    }
+
+
 @mod.capture(
     # TODO: Add in a text object as an optional finisher or matcher here
     rule="""
@@ -282,6 +294,19 @@ class VimActions:
         actions.user.vim_move_cursor(target_line, pos)
 
         return 0 if target["is_post"] else 1
+
+    def vim_take_line_range(target: Dict[str, Any]):
+        """
+        Enter visual line mode and select the given range of lines
+        """
+
+        orig_line, orig_col, max_lines = _fetch_buffer_dimensions()
+        calc_line = lambda line: _calculate_smart_line(line, False, orig_line, max_lines)
+
+        actions.user.vim_go_line(calc_line(target["start_line"]))
+        actions.user.vim_visual_line_mode()
+        if target["end_line"]:
+            actions.user.vim_go_line(calc_line(target["end_line"]))
 
     def vim_bring(target: Dict[str, Any]):
         """
