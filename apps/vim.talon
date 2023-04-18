@@ -106,7 +106,6 @@ pull:
     user.vim_go_mark("z")
     edit.paste()
 
-# TODO: Finish comments
 comment that:
     user.vim_normal_mode()
     key(, c c escape)
@@ -126,6 +125,12 @@ fold close:
 
 fold chuck:
     user.vim_escape_insert_keys("h d")
+
+chuck left:
+    user.vim_escape_insert_keys("r b")
+
+chuck right:
+    user.vim_escape_insert_keys("r w")
 
 # TODO:
 # * Got to have a way to pick a line in fzf. No option built in. Approaches are to add the feature, add in line num to the fzf input, exploit geom of terminal and draw with Talon. Probably the first is easiest.
