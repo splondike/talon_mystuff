@@ -29,7 +29,7 @@ git checkout:
     insert("git checkout feature/")
 
 git push:
-    insert("git push ")
+    insert("git push origin ")
 
 get pull:
     insert("git pull ")

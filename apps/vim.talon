@@ -10,6 +10,11 @@ file save:
     insert(":w")
     key(enter)
 
+file editor exit:
+    user.vim_normal_mode()
+    insert(":q")
+    key(enter)
+
 file edit:
     user.vim_normal_mode()
     insert(":e ")
@@ -122,6 +127,12 @@ fold open:
 
 fold close:
     user.vim_escape_insert_keys("h c")
+
+fold max:
+    user.vim_escape_insert_keys("h M")
+
+fold min:
+    user.vim_escape_insert_keys("h R")
 
 fold chuck:
     user.vim_escape_insert_keys("h d")
