@@ -4,7 +4,7 @@ Map noises (like pop) to actions so they can have contextually differing behavio
 
 import datetime
 
-from talon import Module, Context, actions, noise, registry, cron
+from talon import Module, Context, actions, noise, registry
 
 mod = Module()
 ctx = Context()
@@ -13,10 +13,11 @@ not mode: sleep
 """
 
 # TODO: Make these settings
-hiss_click_lower_bound = 500
+hiss_click_lower_bound = datetime.timedelta(milliseconds=500)
+hiss_click_upper_bound = datetime.timedelta(milliseconds=2000)
 
 
-hiss_click_timeout = None
+last_hiss_down = None
 
 
 @mod.action_class
@@ -27,21 +28,20 @@ class Actions:
         https://noise.talonvoice.com/static/previews/hiss.mp3 for an
         example.
         """
-        global hiss_click_timeout
+        global last_hiss_down
 
-        def _trigger_hiss_click():
-            global hiss_click_timeout
-            actions.user.noise_trigger_hiss_click()
-            hiss_click_timeout = None
+        now = datetime.datetime.now()
 
         if direction:
-            hiss_click_timeout = cron.after(
-                f"{hiss_click_lower_bound}ms",
-                _trigger_hiss_click
-            )
+            last_hiss_down = now
         else:
-            if hiss_click_timeout:
-                cron.cancel(hiss_click_timeout)
+            delta = (now - last_hiss_down)
+            is_click = (
+                (delta > hiss_click_lower_bound) and
+                (delta < hiss_click_upper_bound)
+            )
+            if is_click:
+                actions.user.noise_trigger_hiss_click()
 
     def noise_trigger_hiss_click():
         """
