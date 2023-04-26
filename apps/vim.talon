@@ -75,6 +75,14 @@ jump <user.vim_jump_position> insert:
     is_start_of_word = user.vim_jump(vim_jump_position)
     user.vim_insert_mode(is_start_of_word)
 
+back <user.vim_jump_position>:
+    user.vim_jump(vim_jump_position, 0)
+
+follow (<user.letter> | <user.symbol_key>):
+    key1 = letter or ""
+    key2 = symbol_key or ""
+    user.vim_escape_insert_keys("f {key1}{key2}")
+
 change row:
     user.vim_normal_mode()
     key("r r")
@@ -123,10 +131,10 @@ fold that:
     user.vim_escape_insert_keys("h f")
 
 fold open:
-    user.vim_escape_insert_keys("h o")
+    user.vim_escape_insert_keys("h O")
 
 fold close:
-    user.vim_escape_insert_keys("h c")
+    user.vim_escape_insert_keys("h C")
 
 fold max:
     user.vim_escape_insert_keys("h M")
@@ -146,5 +154,6 @@ chuck right:
 # TODO:
 # * Got to have a way to pick a line in fzf. No option built in. Approaches are to add the feature, add in line num to the fzf input, exploit geom of terminal and draw with Talon. Probably the first is easiest.
 # * Might be able to use two different words for jumping up and down and thereby cover a range of twenty lines with a single number
-# * Add in a jump back command so that we can rotate backwards through a given long line when writing prose.
 # * Temporary rewrite rule. If I'm using a particular phrase or homophone all the time in a particular document it would be nice to temporarily add it to 'words to replace' or 'additional words'.
+# * Periodically grab buffer and run it through a word splitter to get tokens for stack.
+# * Vim helper that show tokens nearby to the current cursor position so you don't have to say them. Though maybe this is a crutch for stack not working as well as hoped.

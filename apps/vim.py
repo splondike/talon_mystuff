@@ -19,6 +19,7 @@ mod.list("vim_text_object", desc="Text objects in vim")
 
 ctx.lists["self.vim_text_object"] = {
     "word": "s w",
+    "sub word": "s i",
     "end": "$",
     "start": "^",
     "subscript": "s ]",
@@ -32,8 +33,8 @@ ctx.lists["self.vim_text_object"] = {
     "outer dub string": "a \"",
     "item": "a a",
     "paragraph": "s p",
+    "outer paragraph": "t p",
 }
-
 
 # Used internally in actions to save and restore the cursor position
 INTERNAL_MARK = "z"
@@ -187,7 +188,8 @@ def _calculate_smart_line(uttered_line, is_absolute, curr_line, max_lines) -> in
 
 def _calculate_pos(
         text, target_type, target_chars,
-        enable_iter=False, orig_col=0, repeated=0
+        enable_iter=False, orig_col=0, repeated=0,
+        search_forward=True
         ) -> Optional[Tuple[int, int]]:
 
     if target_type == "none":
@@ -220,10 +222,16 @@ def _calculate_pos(
         return None
 
     matching_idx = 0
-    for i, (start, _) in enumerate(spans):
-        if not enable_iter or orig_col < start:
-            matching_idx = i
-            break
+    if search_forward:
+        for i, (start, _) in enumerate(spans):
+            if not enable_iter or orig_col < start:
+                matching_idx = i
+                break
+    else:
+        for i, (start, _) in reversed(list(enumerate(spans))):
+            if not enable_iter or orig_col > start:
+                matching_idx = i
+                break
 
     return spans[matching_idx + repeated % len(spans)]
 
@@ -241,7 +249,7 @@ def _fetch_buffer_dimensions() -> Tuple[int, int, int]:
 
 @mod.action_class
 class VimActions:
-    def vim_jump(target: Dict[str, Any]) -> int:
+    def vim_jump(target: Dict[str, Any], search_forward: int = 1) -> int:
         """
         Jump to the given position
         """
@@ -275,7 +283,8 @@ class VimActions:
             target["target_chars"],
             is_same_line,
             orig_col,
-            repeated=target["repeated"]
+            repeated=target["repeated"],
+            search_forward=search_forward == 1
         )
 
         if maybe_pos is None:
@@ -467,6 +476,15 @@ class VimActions:
 
         # See ':h function-list'
         # "execute('normal! dd') executes a normal mode thing without remapping
+
+        # First send a harmless keypress in order to clear any operator pending
+        # or repeat pending. The latter (e.g. pressing the 9 key) actually
+        # causes the following remote-expr called to hang otherwise.
+        subprocess.run(
+            ["nvim", "--headless", "--server", rpc_socket, "--remote-send", "<F4>"],
+            capture_output=True,
+            check=True
+        )
         result = subprocess.run(
             ["nvim", "--headless", "--server", rpc_socket, "--remote-expr", expression],
             capture_output=True,
@@ -480,7 +498,7 @@ class VimActions:
         """
         return actions.user.vim_call_rpc_function(f"getline({line_number})")
 
-    def vim_move_cursor(line_number: int, column_number: int = 1, ) -> str:
+    def vim_move_cursor(line_number: int, column_number: int = 1) -> str:
         """
         Grabs the given line number from the current buffer
         """
