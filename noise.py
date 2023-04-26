@@ -52,6 +52,7 @@ class Actions:
 
 @ctx.action("user.noise_trigger_hiss_click")
 def toggle_dense_grid():
+    return
     if "user.full_mouse_grid_showing" in registry.tags:
         actions.user.full_grid_close()
     else:
