@@ -11,7 +11,6 @@ mod.list("code_mode_global_token", desc="Globally applicable tokens")
 # * Somehow parse a Ctags file: ctags -R --kinds-all=* to get the 
 # * Have a token that drops in a character that's easy to jump to for corrections
 # * Have the ability to go back and correct part of your utterance if it was wrong; we know exactly what we typed.
-# * Jump to subword (parse camel/title/snake case and jump to word)
 # * Correct the phrase 'prefix.prefix2' based on the highest probability of those two things together plus CoC style completion.
 # * Have stack things like 'class' swap to title case
 
@@ -33,6 +32,10 @@ ctx.lists["self.code_mode_global_token"] = {
     "dubstring": "wrap:\",\"",
     "string": "wrap:','",
     "hammer": "formatter:PUBLIC_CAMEL_CASE",
+    "smash": "formatter:NO_SPACES",
+    "title": "formatter:CAPITALIZE_ALL_WORDS",
+    "snake": "formatter:SNAKE_CASE",
+    "camel": "formatter:PRIVATE_CAMEL_CASE",
     "over": "control:out",
 }
 
@@ -97,7 +100,12 @@ class Actions:
             formatter = default_formatter
             words = []
 
-        for item in command:
+        command_items = [
+            item
+            for command_entry in command
+            for item in command_entry.split(";;")
+        ]
+        for item in command_items:
             if item.startswith("literal:"):
                 _flush_words()
                 rtn += item[item.find(":") + 1:]
