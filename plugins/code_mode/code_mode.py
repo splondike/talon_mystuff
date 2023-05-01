@@ -8,6 +8,7 @@ mod.list("code_mode_lang_token", desc="Programming language specific tokens")
 mod.list("code_mode_global_token", desc="Globally applicable tokens")
 # TODO:
 # * Have a mode you get dropped in to automatically like dictation mode that lets you fluidly speak code
+# * Periodically grab buffer and run it through a word splitter to get tokens for stack.
 # * Somehow parse a Ctags file: ctags -R --kinds-all=* to get the 
 # * Have a token that drops in a character that's easy to jump to for corrections
 # * Have the ability to go back and correct part of your utterance if it was wrong; we know exactly what we typed.

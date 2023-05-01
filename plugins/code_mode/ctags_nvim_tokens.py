@@ -43,11 +43,6 @@ def split_token(token):
     return rtn
 
 
-# tokens = ["hello_world", "_hello_world", "helloWorld", "HelloWorld", "Hello", "USBDrive", "_"]
-# for token in tokens:
-#     print(token, "->", split_token(token))
-
-
 def update_list(window):
     global last_working_dir
 

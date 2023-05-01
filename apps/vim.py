@@ -306,6 +306,7 @@ class VimActions:
         actions.user.vim_go_line(calc_line(target["start_line"]))
         actions.user.vim_visual_line_mode()
         if target["end_line"]:
+            print(target)
             actions.user.vim_go_line(calc_line(target["end_line"]))
 
     def vim_bring(target: Dict[str, Any]):
@@ -386,13 +387,11 @@ class VimActions:
         current_mode = actions.user.vim_get_mode()
 
         if current_mode == "n":
-            actions.key("A")
+            actions.user.vim_call_rpc_function("V", "normal!")
         elif current_mode == "v":
-            actions.key("escape A")
+            actions.user.vim_call_rpc_function("escape V", "normal!")
         elif current_mode == "i":
-            # This little dance keeps the cursor position the same
-            actions.key("escape ` ^")
-            actions.key("A")
+            actions.user.vim_call_rpc_function("escape ` ^ V", "normal!")
 
     def vim_get_mode() -> str:
         """
@@ -406,6 +405,7 @@ class VimActions:
         Change vim to normal mode
         """
         current_mode = actions.user.vim_get_mode()
+
 
         if current_mode == "i":
             # This little dance keeps the cursor position the same
@@ -460,9 +460,9 @@ class VimActions:
         """
         Goes to the specified line number
         """
-        actions.user.vim_escape_insert_keys([" ".join(str(line_number) + "G")])
+        actions.user.vim_call_rpc_function(f"{line_number}G", "normal!")
 
-    def vim_call_rpc_function(expression: str) -> str:
+    def vim_call_rpc_function(command: str, mode: str="expression") -> str:
         """
         Runs the given Neovim expression on the given Neovim socket and
         returns the result as a string
@@ -475,8 +475,6 @@ class VimActions:
         _, rpc_socket = title.split(" | ")
 
         # See ':h function-list'
-        # "execute('normal! dd') executes a normal mode thing without remapping
-
         # First send a harmless keypress in order to clear any operator pending
         # or repeat pending. The latter (e.g. pressing the 9 key) actually
         # causes the following remote-expr called to hang otherwise.
@@ -485,6 +483,13 @@ class VimActions:
             capture_output=True,
             check=True
         )
+        if mode == "expression":
+            expression = command
+        elif mode == "normal!":
+            # TODO: Escape any quotation marks
+            expression = f"execute(\"normal! {command}\")"
+        else:
+            raise RuntimeError(f"Unsupported mode {mode}")
         result = subprocess.run(
             ["nvim", "--headless", "--server", rpc_socket, "--remote-expr", expression],
             capture_output=True,
@@ -514,7 +519,7 @@ class VimActions:
         """
         Sets a vim mark with the given name
         """
-        actions.user.vim_escape_insert_keys("m " + mark_name)
+        actions.user.vim_call_rpc_function("m " + mark_name, "normal!")
 
     def vim_go_mark(mark_name: str):
         """

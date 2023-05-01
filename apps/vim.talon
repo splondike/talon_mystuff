@@ -155,5 +155,4 @@ chuck right:
 # * Got to have a way to pick a line in fzf. No option built in. Approaches are to add the feature, add in line num to the fzf input, exploit geom of terminal and draw with Talon. Probably the first is easiest.
 # * Might be able to use two different words for jumping up and down and thereby cover a range of twenty lines with a single number
 # * Temporary rewrite rule. If I'm using a particular phrase or homophone all the time in a particular document it would be nice to temporarily add it to 'words to replace' or 'additional words'.
-# * Periodically grab buffer and run it through a word splitter to get tokens for stack.
 # * Vim helper that show tokens nearby to the current cursor position so you don't have to say them. Though maybe this is a crutch for stack not working as well as hoped.
