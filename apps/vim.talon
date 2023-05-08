@@ -120,12 +120,7 @@ pull:
     edit.paste()
 
 comment that:
-    user.vim_normal_mode()
-    key(, c c escape)
-
-comment <user.vim_line_range>:
-    user.vim_take_line_range(vim_line_range)
-    key(, c c escape)
+    user.vim_call_rpc_function(",cc", "normal")
 
 fold that:
     user.vim_escape_insert_keys("h f")

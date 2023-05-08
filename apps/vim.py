@@ -485,6 +485,9 @@ class VimActions:
         )
         if mode == "expression":
             expression = command
+        elif mode == "normal":
+            # TODO: Escape any quotation marks
+            expression = f"execute(\"normal {command}\")"
         elif mode == "normal!":
             # TODO: Escape any quotation marks
             expression = f"execute(\"normal! {command}\")"

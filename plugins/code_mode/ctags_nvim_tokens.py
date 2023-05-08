@@ -72,4 +72,4 @@ def update_list(window):
     ctx.lists["user.code_mode_project_token"] = tokens
 
 
-ui.register("win_focus", update_list)
+# ui.register("win_focus", update_list)
