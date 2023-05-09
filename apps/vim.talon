@@ -43,7 +43,7 @@ search functions [<user.word>]:
     user.vim_escape_insert_keys(", d")
     insert(word or "")
 
-centre that:
+center that:
     user.vim_escape_insert_keys("h z")
 
 chip:
