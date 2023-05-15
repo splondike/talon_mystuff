@@ -6,14 +6,10 @@ settings():
     key_wait = 2
 
 file save:
-    user.vim_normal_mode()
-    insert(":w")
-    key(enter)
+    user.vim_call_rpc_function(":w", "command")
 
 file editor exit:
-    user.vim_normal_mode()
-    insert(":q")
-    key(enter)
+    user.vim_call_rpc_function(":q", "command")
 
 file edit:
     user.vim_normal_mode()
@@ -50,7 +46,7 @@ chip:
     edit.undo()
 
 pour that:
-    user.vim_escape_insert_keys("o")
+    user.vim_send_rpc_keys("<Esc>o")
 
 mark [<user.letter>]:
     mark_name = letter or "a"
@@ -59,14 +55,26 @@ mark [<user.letter>]:
 insert:
     user.vim_insert_mode()
 
-move row up: user.vim_escape_insert_keys("ctrl-f")
-move row down: user.vim_escape_insert_keys("ctrl-s")
+trip move up: user.vim_escape_insert_keys("ctrl-f")
+trip move down: user.vim_escape_insert_keys("ctrl-s")
+
+# Would be better to use call RPC, but haven't worked out how
+comp: user.vim_send_rpc_keys("<C-e>")
+comp last: user.vim_send_rpc_keys("<C-p>")
+
+format split toggle: user.vim_call_rpc_function(",m", "normal")
 
 # Movement and editing, primarily anchored to line numbers.
 
 jump mark [<user.letter>]:
     mark_name = letter or "a"
     user.vim_escape_insert_keys("` {mark_name}")
+
+jump crown:
+    user.vim_call_rpc_function("gg", "normal!")
+
+jump foot:
+    user.vim_call_rpc_function("G", "normal!")
 
 jump <user.vim_jump_position>:
     user.vim_jump(vim_jump_position)
@@ -83,30 +91,28 @@ follow (<user.letter> | <user.symbol_key>):
     key2 = symbol_key or ""
     user.vim_escape_insert_keys("f {key1}{key2}")
 
-change row:
-    user.vim_normal_mode()
-    key("r r")
+change trip:
+    # Using call_rpc doesn't preserve indentation
+    user.vim_send_rpc_keys("<Esc>rr")
 
 change {user.vim_text_object}:
-    user.vim_escape_insert_keys("r {vim_text_object}")
+    user.vim_call_rpc_function("d{vim_text_object}", "normal")
+    user.vim_call_rpc_function("startinsert", "command")
 
-chuck row:
-    user.vim_normal_mode()
-    key("d d")
+chuck trip:
+    user.vim_call_rpc_function("dd", "normal!")
 
 chuck that:
-    user.vim_escape_insert_keys("d")
+    user.vim_call_rpc_function("d", "normal!")
 
 chuck {user.vim_text_object}:
-    user.vim_normal_mode()
-    key("d {vim_text_object}")
+    user.vim_call_rpc_function("d{vim_text_object}", "normal")
 
-take row:
+take trip:
     user.vim_visual_line_mode()
 
 take {user.vim_text_object}:
-    user.vim_normal_mode()
-    key("a {vim_text_object}")
+    user.vim_call_rpc_function("a{vim_text_object}", "normal")
 
 take <user.vim_line_range>:
     user.vim_take_line_range(vim_line_range)

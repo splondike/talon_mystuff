@@ -18,32 +18,30 @@ title: /^VIM/i
 mod.list("vim_text_object", desc="Text objects in vim")
 
 ctx.lists["self.vim_text_object"] = {
-    "word": "s w",
-    "sub word": "s i",
+    "word": "sw",
+    "sub word": "si",
     "end": "$",
     "start": "^",
-    "subscript": "s ]",
-    "args": "s )",
-    "brace": "s }",
-    "angle": "s <",
-    "outer angle": "a <",
-    "string": "s '",
-    "outer string": "a '",
-    "dub string": "s \"",
-    "outer dub string": "a \"",
-    "item": "a a",
-    "paragraph": "s p",
-    "outer paragraph": "t p",
+    "subscript": "s]",
+    "paren": "s)",
+    "brace": "s}",
+    "angle": "s<",
+    "outer angle": "a<",
+    "string": "s'",
+    "outer string": "a'",
+    "quad": "s\"",
+    "outer quad": "a\"",
+    "item": "aa",
+    "paragraph": "sp",
+    "outer paragraph": "tp",
 }
 
 # Used internally in actions to save and restore the cursor position
 INTERNAL_MARK = "z"
 
 # TODO: Use the RPC for all key presses, and use them unmapped where possible to make this code
-# work regardless of people's custom config. Could probably also remove the
+# workregardless of people's custom config. Could probably also remove the
 # key_wait setting then
-# TODO: I'm getting some stalls with the RPC thing sometimes that are remedied by pressing escape
-# on the keyboard. Try and get a reproducible test case, perhaps it's operator pending mode?
 
 
 @mod.capture(
@@ -90,7 +88,7 @@ def vim_jump_position(m) -> Dict[str, Any]:
     }
 
 
-@mod.capture(rule="<digits> | (<digits> through <digits>)")
+@mod.capture(rule="<digits> | (<digits> past <digits>)")
 def vim_line_range(m) -> Dict[str, Any]:
     """
     Capture a range of one or more lines
@@ -106,7 +104,7 @@ def vim_line_range(m) -> Dict[str, Any]:
     # TODO: Add in a text object as an optional finisher or matcher here
     rule="""
         <digits> |
-        (<digits> through <digits>) |
+        (<digits> past <digits>) |
         (<digits> (<user.letter>+ | numb <user.number_key>+) [(second|third)])
     """
 )
@@ -125,7 +123,7 @@ def vim_bring_range(m) -> Dict[str, Any]:
             "range_type": "line",
             "line": m.digits
         }
-    elif len(m) == 3 and m[1] == "through":
+    elif len(m) == 3 and m[1] == "past":
         return {
             "range_type": "line_range",
             "line_start": m.digits_1,
@@ -168,6 +166,7 @@ def _calculate_smart_line(uttered_line, is_absolute, curr_line, max_lines) -> in
     curr_rest = curr_line % 100
 
     if curr_rest == uttered_line:
+        # We just said the current line
         return curr_line
 
     base = curr_hundreds + uttered_line
@@ -305,8 +304,7 @@ class VimActions:
 
         actions.user.vim_go_line(calc_line(target["start_line"]))
         actions.user.vim_visual_line_mode()
-        if target["end_line"]:
-            print(target)
+        if "end_line" in target:
             actions.user.vim_go_line(calc_line(target["end_line"]))
 
     def vim_bring(target: Dict[str, Any]):
@@ -388,10 +386,13 @@ class VimActions:
 
         if current_mode == "n":
             actions.user.vim_call_rpc_function("V", "normal!")
-        elif current_mode == "v":
-            actions.user.vim_call_rpc_function("escape V", "normal!")
+        elif current_mode in ("v", "V"):
+            # Don't know how to go to normal mode using call_rpc here
+            actions.user.vim_send_rpc_keys("<Esc>")
+            actions.user.vim_call_rpc_function("V", "normal!")
         elif current_mode == "i":
-            actions.user.vim_call_rpc_function("escape ` ^ V", "normal!")
+            actions.user.vim_call_rpc_function("stopinsert", "command")
+            actions.user.vim_call_rpc_function("V", "normal!")
 
     def vim_get_mode() -> str:
         """
@@ -462,6 +463,24 @@ class VimActions:
         """
         actions.user.vim_call_rpc_function(f"{line_number}G", "normal!")
 
+    def vim_send_rpc_keys(keys: str):
+        """
+        Sends the given Vim-style key presses to Neovim. Prefer using
+        vim_call_rpc_function
+        """
+
+        title = actions.win.title()
+        if not title.startswith("VIM"):
+            raise RuntimeError("Called when VIM not focussed")
+
+        _, rpc_socket = title.split(" | ")
+
+        subprocess.run(
+            ["nvim", "--headless", "--server", rpc_socket, "--remote-send", keys],
+            capture_output=True,
+            check=True
+        )
+
     def vim_call_rpc_function(command: str, mode: str="expression") -> str:
         """
         Runs the given Neovim expression on the given Neovim socket and
@@ -473,6 +492,8 @@ class VimActions:
             raise RuntimeError("Called when VIM not focussed")
 
         _, rpc_socket = title.split(" | ")
+
+        escaped_command = command.replace("\\", "\\\\").replace("\"", "\\\"")
 
         # See ':h function-list'
         # First send a harmless keypress in order to clear any operator pending
@@ -486,11 +507,11 @@ class VimActions:
         if mode == "expression":
             expression = command
         elif mode == "normal":
-            # TODO: Escape any quotation marks
-            expression = f"execute(\"normal {command}\")"
+            expression = f"execute(\"normal {escaped_command}\")"
         elif mode == "normal!":
-            # TODO: Escape any quotation marks
-            expression = f"execute(\"normal! {command}\")"
+            expression = f"execute(\"normal! {escaped_command}\")"
+        elif mode == "command":
+            expression = f"execute(\"{escaped_command}\")"
         else:
             raise RuntimeError(f"Unsupported mode {mode}")
         result = subprocess.run(
@@ -504,7 +525,9 @@ class VimActions:
         """
         Grabs the given line number from the current buffer
         """
-        return actions.user.vim_call_rpc_function(f"getline({line_number})")
+
+        escaped_result = actions.user.vim_call_rpc_function(f"getline({line_number})")
+        return escaped_result.replace("^I", "\t")
 
     def vim_move_cursor(line_number: int, column_number: int = 1) -> str:
         """
@@ -540,22 +563,22 @@ class VimActions:
 @ctx.action_class("edit")
 class VimEditActions:
     def undo():
-        actions.user.vim_escape_insert_keys("z")
+        actions.user.vim_call_rpc_function("u", "normal!")
 
     def redo():
-        actions.user.vim_escape_insert_keys("shift-z")
+        actions.user.vim_call_rpc_function("Z", "normal")
 
     def copy():
-        actions.user.vim_escape_insert_keys("c")
+        actions.user.vim_call_rpc_function("y", "normal!")
 
     def paste():
-        actions.user.vim_escape_insert_keys("v")
+        actions.user.vim_call_rpc_function("p", "normal!")
 
     def indent_more():
-        actions.user.vim_escape_insert_keys("> >")
+        actions.user.vim_call_rpc_function("> >", "normal")
 
     def indent_less():
-        actions.user.vim_escape_insert_keys("< <")
+        actions.user.vim_call_rpc_function("< <", "normal")
 
     def find(text: str = None):
         actions.user.vim_normal_mode()
@@ -566,6 +589,13 @@ class VimEditActions:
 
     def find_next():
         actions.user.vim_escape_insert_keys("ctrl-i")
+
+    def line_start():
+        actions.user.vim_call_rpc_function("^", "normal!")
+
+    def line_end():
+        actions.user.vim_call_rpc_function("$", "normal!")
+        actions.user.vim_send_rpc_keys("<Right>")
 
 
 @ctx.action_class("win")

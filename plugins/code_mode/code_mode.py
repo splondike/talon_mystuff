@@ -1,26 +1,19 @@
-from typing import List
+from typing import List, Set
 
 from talon import Module, Context, actions
 
 mod = Module()
 mod.list("code_mode_project_token", desc="Project specific tokens")
+mod.list("code_mode_seed_tokens", desc="User custom words that are always available")
 mod.list("code_mode_lang_token", desc="Programming language specific tokens")
 mod.list("code_mode_global_token", desc="Globally applicable tokens")
-# TODO:
-# * Have a mode you get dropped in to automatically like dictation mode that lets you fluidly speak code
-# * Periodically grab buffer and run it through a word splitter to get tokens for stack.
-# * Somehow parse a Ctags file: ctags -R --kinds-all=* to get the 
-# * Have a token that drops in a character that's easy to jump to for corrections
-# * Have the ability to go back and correct part of your utterance if it was wrong; we know exactly what we typed.
-# * Correct the phrase 'prefix.prefix2' based on the highest probability of those two things together plus CoC style completion.
-# * Have stack things like 'class' swap to title case
 
 mod.tag("code_mode_active", desc="Activate the stack command")
 
 ctx = Context()
 
 ctx = Context()
-ctx.lists["self.code_mode_global_token"] = {
+global_tokens = {
     "dot": "literal:.",
     "equals": "literal:=",
     "spamma": "literal:, ",
@@ -30,7 +23,7 @@ ctx.lists["self.code_mode_global_token"] = {
     "angle": "wrap:<,>",
     "square": "wrap:[,]",
     "brace": "wrap:{,}",
-    "dubstring": "wrap:\",\"",
+    "quad": "wrap:\",\"",
     "string": "wrap:','",
     "hammer": "formatter:PUBLIC_CAMEL_CASE",
     "smash": "formatter:NO_SPACES",
@@ -39,6 +32,7 @@ ctx.lists["self.code_mode_global_token"] = {
     "camel": "formatter:PRIVATE_CAMEL_CASE",
     "over": "control:out",
 }
+ctx.lists["self.code_mode_global_token"] = global_tokens
 
 
 @mod.capture(rule="{self.code_mode_project_token}")
@@ -47,6 +41,14 @@ def code_mode_project_token(m) -> List[str]:
     Intended for project specific tokens
     """
     return m.code_mode_project_token
+
+
+@mod.capture(rule="{self.code_mode_seed_tokens}")
+def code_mode_seed_tokens(m) -> List[str]:
+    """
+    Intended for generic words that are always available
+    """
+    return m.code_mode_seed_tokens
 
 
 @mod.capture(rule="{self.code_mode_lang_token}")
@@ -64,15 +66,14 @@ def code_mode_global_token(m) -> List[str]:
     """
     return m.code_mode_global_token
 
-
 @mod.capture(
     # Ordering of captures is important in case project tokens
     # interfere with higher level ones
     rule="""(
         <self.code_mode_global_token> |
         <self.code_mode_lang_token> |
-        <self.code_mode_project_token> |
-        <user.word>
+        <self.code_mode_seed_tokens> |
+        <self.code_mode_project_token>
     )+"""
 )
 def code_mode_command(m) -> List[str]:
@@ -133,3 +134,12 @@ class Actions:
         actions.insert(rtn + suffix)
         for _ in range(len(suffix)):
             actions.edit.left()
+
+    def code_mode_used_tokens() -> Set[str]:
+        """
+        Lists out tokens that have already been mapped, Talon doesn't
+        have defined semantics for which captures should override others.
+        """
+
+        return set(global_tokens.keys())
+

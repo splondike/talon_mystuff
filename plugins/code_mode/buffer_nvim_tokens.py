@@ -5,12 +5,15 @@ Populates the code mode project tokens from the currently focussed buffer.
 import os
 import re
 
-from talon import actions, ui, cron, Context
+from talon import actions, ui, cron, Context, Module
 
 ctx = Context()
 ctx.matches = r"""
 title: /^VIM/i
 """
+
+# TODO:
+# * Have a list of common words that get loaded from a file as well to supplement what's in the buffer
 
 
 last_working_dir = None
@@ -59,9 +62,15 @@ def _populate_list():
         "join(getline(0, 1000))"
     )
 
-    ctx.lists["user.code_mode_project_token"] = calculate_tokens(
+    # Tabs are encoded as ^I
+    buffer_contents = buffer_contents.replace("^I", "\t")
+
+    used_tokens = actions.user.code_mode_used_tokens()
+    buffer_result = calculate_tokens(
         buffer_contents
     )
+
+    ctx.lists["user.code_mode_project_token"] = buffer_result - used_tokens
 
 
 def toggle_timer(window):
